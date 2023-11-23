@@ -1,0 +1,9 @@
+{
+  "hosting": [
+    {
+      "target": "sniphubv2",
+      "source": ".",
+      "frameworksBackend": {}
+    }
+  ]
+}

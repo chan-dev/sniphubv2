@@ -96,10 +96,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "sniphubv2:build:production"
+              "buildTarget": "sniphubv2:build:production"
             },
             "development": {
-              "browserTarget": "sniphubv2:build:development"
+              "buildTarget": "sniphubv2:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -107,7 +107,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sniphubv2:build"
+            "buildTarget": "sniphubv2:build"
           }
         },
         "test": {
@@ -127,6 +127,13 @@
               "src/styles.scss"
             ],
             "scripts": []
+          }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "version": 2,
+            "browserTarget": "sniphubv2:build:production"
           }
         }
       }

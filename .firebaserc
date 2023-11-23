@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "sniphubv2": {
+      "hosting": {
+        "sniphubv2": [
+          "sniphubv2"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "sniphubv2"
+  }
+}
