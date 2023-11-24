@@ -15,19 +15,6 @@
     </div>
   </div>
   <div id="content" class="col-span-3 p-2">
-    <div class="flex justify-between">
-      <span>Title</span>
-      <div class="flex items-center gap-1">
-        <select name="" id="">
-          <option value="">javascript</option>
-        </select>
-        <button type="button" class="inline-flex items-center">
-          <ng-icon name="ionCopyOutline"></ng-icon>
-        </button>
-      </div>
-    </div>
-
-    <!-- content -->
-    <div [contentEditable]="true"></div>
+    <app-snippet [snippetId]="(activeSnippetId$ | async) || ''"></app-snippet>
   </div>
 </div>

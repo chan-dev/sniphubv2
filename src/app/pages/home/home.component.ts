@@ -16,11 +16,18 @@ import { CollapsibleList } from '../../models/list';
 import { GroupsService } from '../../services/groups.service';
 import { ListsService } from '../../services/lists.service';
 import { GroupsComponent } from '../../components/groups/groups.component';
+import { SnippetComponent } from '../../components/snippet/snippet.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NgIconComponent, GroupsComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    NgIconComponent,
+    GroupsComponent,
+    SnippetComponent,
+  ],
   templateUrl: './home.component.html',
   styles: [],
   viewProviders: [
