@@ -7,54 +7,11 @@
       </button>
     </div>
     <div class="flex items-center">
-      <ul class="flex">
-        @for (group of groups; track group.id) {
-          <li class="w-[100px] cursor-pointer" (click)="toggleGroup(group.id)">
-            <span class="inline-flex items-center">
-              @if (lists[group.id]?.length) {
-                <ng-icon
-                  [name]="group.open ? 'ionChevronDown' : 'ionChevronForward'"
-                ></ng-icon>
-              }
-
-              {{ group.name }}
-            </span>
-
-            <!-- TODO: convert to list component -->
-            @if (group.open && lists[group.id]?.length) {
-              <ul class="pl-4" (click)="$event.stopPropagation()">
-                @for (list of lists[group.id]; track list.id) {
-                  <li (click)="toggleSnippets(group.id, list.id)">
-                    <span class="inline-flex items-center">
-                      @if ((list.snippets | keyvalue).length > 0) {
-                        <ng-icon
-                          [name]="
-                            list.open ? 'ionChevronDown' : 'ionChevronForward'
-                          "
-                        ></ng-icon>
-                      }
-
-                      {{ list.name }}
-                    </span>
-
-                    <!-- TODO: convert to snippetscomponent -->
-                    @if (list.open && (list.snippets | keyvalue).length) {
-                      <ul class="pl-4" (click)="$event.stopPropagation()">
-                        @for (
-                          snippet of list.snippets | keyvalue;
-                          track snippet.key
-                        ) {
-                          <li>{{ snippet.value.title }}</li>
-                        }
-                      </ul>
-                    }
-                  </li>
-                }
-              </ul>
-            }
-          </li>
-        }
-      </ul>
+      <app-groups
+        [groups]="groups"
+        [lists]="lists"
+        [activeSnippetId]="(activeSnippetId$ | async) || ''"
+      ></app-groups>
     </div>
   </div>
   <div id="content" class="col-span-3 p-2">

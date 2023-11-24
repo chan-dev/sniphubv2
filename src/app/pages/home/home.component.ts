@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
-import { from, map, mergeMap } from 'rxjs';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { from, map, mergeMap, tap } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -15,11 +15,12 @@ import { CollapsibleGroup } from '../../models/group';
 import { CollapsibleList } from '../../models/list';
 import { GroupsService } from '../../services/groups.service';
 import { ListsService } from '../../services/lists.service';
+import { GroupsComponent } from '../../components/groups/groups.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NgIconComponent],
+  imports: [CommonModule, RouterOutlet, NgIconComponent, GroupsComponent],
   templateUrl: './home.component.html',
   styles: [],
   viewProviders: [
@@ -33,13 +34,18 @@ import { ListsService } from '../../services/lists.service';
   ],
 })
 export class HomeComponent implements OnInit {
+  private route = inject(ActivatedRoute);
   private groupsService = inject(GroupsService);
   private listsService = inject(ListsService);
 
   groups!: CollapsibleGroup[];
-
   // Record<groupId, CollapsibleList>
   lists: Record<string, CollapsibleList[] | undefined> = {};
+
+  activeSnippetId$ = this.route.queryParamMap.pipe(
+    tap((params) => console.log('params', params)),
+    map((params) => params.get('snippetId')),
+  );
 
   ngOnInit() {
     const userId = 'YNcQBgiyZ5ANasIrvH5p';

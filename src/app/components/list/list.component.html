@@ -1,0 +1,28 @@
+<span class="inline-flex items-center">
+  @if ((list.snippets | keyvalue).length > 0) {
+    <ng-icon
+      [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
+    ></ng-icon>
+  }
+
+  {{ list.name }}
+</span>
+
+@if (list.open && (list.snippets | keyvalue).length) {
+  <ul (click)="$event.stopPropagation()">
+    @for (snippet of list.snippets | keyvalue; track snippet.key) {
+      <li class="relative pl-4">
+        <a routerLink="." [queryParams]="{ snippetId: snippet.key }">{{
+          snippet.value.title
+        }}</a>
+
+        @if (activeSnippetId === snippet.key) {
+          <!-- TODO: find a better way to achieve this styling. Expand to the entire width of the sidebar -->
+          <div
+            class="absolute inset-x-0 top-0 -z-10 -ml-[32px] -mr-[9px] h-full bg-gray-200"
+          ></div>
+        }
+      </li>
+    }
+  </ul>
+}

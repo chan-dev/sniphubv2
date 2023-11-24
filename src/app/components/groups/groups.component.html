@@ -1,0 +1,28 @@
+<ul class="flex w-full">
+  @for (group of groups; track group.id) {
+    <li class="w-[100px] flex-1 cursor-pointer" (click)="toggleGroup(group.id)">
+      <span class="inline-flex items-center">
+        @if (lists[group.id]?.length) {
+          <ng-icon
+            [name]="group.open ? 'ionChevronDown' : 'ionChevronForward'"
+          ></ng-icon>
+        }
+
+        {{ group.name }}
+      </span>
+
+      @if (group.open && lists[group.id]?.length) {
+        <ul (click)="$event.stopPropagation()">
+          @for (list of lists[group.id]; track list.id) {
+            <li class="pl-4" (click)="toggleSnippets(group.id, list.id)">
+              <app-list
+                [list]="list"
+                [activeSnippetId]="activeSnippetId"
+              ></app-list>
+            </li>
+          }
+        </ul>
+      }
+    </li>
+  }
+</ul>
