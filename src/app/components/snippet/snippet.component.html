@@ -1,18 +1,19 @@
-@if (snippet$ | async; as snippet) {
-  <div class="flex justify-between">
-    <span>{{ snippet.title }} </span>
-    <div class="flex items-center gap-1">
-      <select name="" id="">
-        <option value="">javascript</option>
-      </select>
-      <button type="button" class="inline-flex items-center">
-        <ng-icon name="ionCopyOutline"></ng-icon>
-      </button>
-    </div>
+<div class="flex justify-between">
+  <span>{{ snippet.title }} </span>
+  <div class="flex items-center gap-1">
+    <select #langSelect (change)="setLanguage(langSelect.value)">
+      @for (lang of languages; track lang.id) {
+        <option value="{{ lang.id }}">{{ lang.id }}</option>
+      }
+    </select>
+    <button type="button" class="inline-flex items-center">
+      <ng-icon name="ionCopyOutline"></ng-icon>
+    </button>
   </div>
+</div>
 
-  <!-- content -->
-  <div [contentEditable]="true" class="h-full w-full">
-    {{ snippet.content }}
-  </div>
-}
+<ngx-monaco-editor
+  [options]="editorOptions"
+  [(ngModel)]="snippet.content"
+  (onInit)="onEditorInit($event)"
+></ngx-monaco-editor>

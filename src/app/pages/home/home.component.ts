@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { from, map, mergeMap, tap } from 'rxjs';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
+import { from, map, mergeMap, shareReplay, tap } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -9,7 +9,7 @@ import {
   ionChevronForward,
   ionChevronDown,
 } from '@ng-icons/ionicons';
-import { simpleJavascript } from '@ng-icons/simple-icons';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
 import { CollapsibleGroup } from '../../models/group';
 import { CollapsibleList } from '../../models/list';
@@ -24,6 +24,7 @@ import { SnippetComponent } from '../../components/snippet/snippet.component';
   imports: [
     CommonModule,
     RouterOutlet,
+    MonacoEditorModule,
     NgIconComponent,
     GroupsComponent,
     SnippetComponent,
@@ -36,7 +37,6 @@ import { SnippetComponent } from '../../components/snippet/snippet.component';
       ionCopyOutline,
       ionChevronForward,
       ionChevronDown,
-      simpleJavascript,
     }),
   ],
 })
@@ -52,6 +52,7 @@ export class HomeComponent implements OnInit {
   activeSnippetId$ = this.route.queryParamMap.pipe(
     tap((params) => console.log('params', params)),
     map((params) => params.get('snippetId')),
+    shareReplay(1),
   );
 
   ngOnInit() {

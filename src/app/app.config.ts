@@ -7,6 +7,15 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment.development';
+import {
+  MonacoEditorModule,
+  NgxMonacoEditorConfig,
+} from 'ngx-monaco-editor-v2';
+
+const monacoConfig: NgxMonacoEditorConfig = {
+  // baseUrl: './assets', // configure base path for monaco editor. Starting with version 8.0.0 it defaults to './assets'. Previous releases default to '/assets'
+  defaultOptions: { scrollBeyondLastLine: false }, // pass default options to be used
+};
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,5 +26,6 @@ export const appConfig: ApplicationConfig = {
     ),
     importProvidersFrom(provideAuth(() => getAuth())),
     importProvidersFrom(provideFirestore(() => getFirestore())),
+    importProvidersFrom(MonacoEditorModule.forRoot(monacoConfig)),
   ],
 };
