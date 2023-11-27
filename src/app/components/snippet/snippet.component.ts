@@ -14,7 +14,22 @@ import { Snippet } from '../../models/snippet';
   standalone: true,
   imports: [CommonModule, FormsModule, MonacoEditorModule, NgIconComponent],
   templateUrl: './snippet.component.html',
-  styles: ``,
+  styles: `
+    :host {
+      display: block;
+      height: 100%;
+    }
+
+    .code-editor-container {
+      height: calc(100vh - 40px);
+    }
+
+    .code-editor {
+      .editor-container {
+        height: 100% !important;
+      }
+    }
+  `,
   providers: [],
 })
 export class SnippetComponent implements OnInit {
@@ -26,12 +41,17 @@ export class SnippetComponent implements OnInit {
     id: '',
     title: 'Untitled',
     content: '',
-    language: '',
+    language: 'javascript',
   } as Snippet;
 
   snippet = this.defaultSnippet;
 
-  editorOptions = { theme: 'vs-dark', language: 'javascript' };
+  editorOptions = {
+    theme: 'vs-dark',
+    language: 'javascript',
+    readOnly: true,
+    contextmenu: false,
+  };
 
   languages: any[] = [];
 
@@ -59,6 +79,7 @@ export class SnippetComponent implements OnInit {
       .subscribe((snippet) => {
         console.log('snippet', snippet);
         this.snippet = snippet;
+        this.setLanguage(this.snippet.language);
       });
   }
 

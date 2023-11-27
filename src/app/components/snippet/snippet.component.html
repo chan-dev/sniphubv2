@@ -1,7 +1,11 @@
-<div class="flex justify-between">
+<div class="mb-2 flex justify-between p-2">
   <span>{{ snippet.title }} </span>
   <div class="flex items-center gap-1">
-    <select #langSelect (change)="setLanguage(langSelect.value)">
+    <select
+      #langSelect
+      [(ngModel)]="snippet.language"
+      (change)="setLanguage(langSelect.value)"
+    >
       @for (lang of languages; track lang.id) {
         <option value="{{ lang.id }}">{{ lang.id }}</option>
       }
@@ -12,8 +16,11 @@
   </div>
 </div>
 
-<ngx-monaco-editor
-  [options]="editorOptions"
-  [(ngModel)]="snippet.content"
-  (onInit)="onEditorInit($event)"
-></ngx-monaco-editor>
+<div class="code-editor-container">
+  <ngx-monaco-editor
+    class="code-editor !h-full"
+    [options]="editorOptions"
+    [(ngModel)]="snippet.content"
+    (onInit)="onEditorInit($event)"
+  ></ngx-monaco-editor>
+</div>
