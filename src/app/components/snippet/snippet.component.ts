@@ -46,6 +46,8 @@ export class SnippetComponent implements OnInit {
 
   snippet = this.defaultSnippet;
 
+  editorContent = this.snippet.content;
+
   editorOptions = {
     theme: 'vs-dark',
     language: 'javascript',
@@ -54,6 +56,8 @@ export class SnippetComponent implements OnInit {
   };
 
   languages: any[] = [];
+
+  shouldEdit = false;
 
   @Input() set snippetId(id: string) {
     if (!id) {
@@ -78,7 +82,13 @@ export class SnippetComponent implements OnInit {
       )
       .subscribe((snippet) => {
         console.log('snippet', snippet);
+
+        if (!snippet) {
+          return;
+        }
+
         this.snippet = snippet;
+        this.editorContent = this.snippet.content;
         this.setLanguage(this.snippet.language);
       });
   }
@@ -99,5 +109,36 @@ export class SnippetComponent implements OnInit {
       ...this.editorOptions,
       language: langId,
     };
+  }
+
+  updateReadonlyMode(readOnly: boolean) {
+    this.editorOptions = {
+      ...this.editorOptions,
+      readOnly,
+    };
+  }
+
+  editSnippet(snippetId: string) {
+    if (snippetId && !this.shouldEdit) {
+      this.shouldEdit = true;
+      this.updateReadonlyMode(false);
+    }
+  }
+
+  saveSnippet(snippetId: string) {
+    if (snippetId) {
+      this.shouldEdit = false;
+      this.updateReadonlyMode(true);
+    }
+  }
+
+  cancelUpdateSnippet() {
+    const question = 'Are you sure you want to discard your current changes?';
+    // TODO: replace with modal
+    if (window.confirm(question)) {
+      this.shouldEdit = false;
+      this.updateReadonlyMode(true);
+      this.editorContent = this.snippet.content;
+    }
   }
 }

@@ -7,6 +7,10 @@ import {
   ionCopyOutline,
   ionChevronForward,
   ionChevronDown,
+  ionPencilSharp,
+  ionSave,
+  ionCheckmarkSharp,
+  ionClose,
 } from '@ng-icons/ionicons';
 import { simpleJavascript } from '@ng-icons/simple-icons';
 
@@ -22,6 +26,10 @@ import { simpleJavascript } from '@ng-icons/simple-icons';
       ionCopyOutline,
       ionChevronForward,
       ionChevronDown,
+      ionPencilSharp,
+      ionSave,
+      ionCheckmarkSharp,
+      ionClose,
       simpleJavascript,
     }),
   ],

@@ -1,18 +1,46 @@
 <div class="mb-2 flex justify-between p-2">
   <span>{{ snippet.title }} </span>
   <div class="flex items-center gap-1">
-    <select
-      #langSelect
-      [(ngModel)]="snippet.language"
-      (change)="setLanguage(langSelect.value)"
-    >
-      @for (lang of languages; track lang.id) {
-        <option value="{{ lang.id }}">{{ lang.id }}</option>
-      }
-    </select>
-    <button type="button" class="inline-flex items-center">
-      <ng-icon name="ionCopyOutline"></ng-icon>
-    </button>
+    @if (!shouldEdit) {
+      <button type="button" class="inline-flex items-center">
+        <ng-icon name="ionCopyOutline" class="mr-1"></ng-icon>
+        Copy
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center"
+        (click)="editSnippet(snippet.id)"
+      >
+        <ng-icon name="ionPencilSharp" class="mr-1"></ng-icon>
+        Edit
+      </button>
+    } @else {
+      <select
+        #langSelect
+        [(ngModel)]="snippet.language"
+        (change)="setLanguage(langSelect.value)"
+      >
+        @for (lang of languages; track lang.id) {
+          <option value="{{ lang.id }}">{{ lang.id }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="inline-flex items-center"
+        (click)="saveSnippet(snippet.id)"
+      >
+        <ng-icon name="ionCheckmarkSharp" class="mr-1"></ng-icon>
+        Save
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center"
+        (click)="cancelUpdateSnippet()"
+      >
+        <ng-icon name="ionClose" class="mr-1"></ng-icon>
+        Cancel
+      </button>
+    }
   </div>
 </div>
 
@@ -20,7 +48,8 @@
   <ngx-monaco-editor
     class="code-editor !h-full"
     [options]="editorOptions"
-    [(ngModel)]="snippet.content"
+    [(ngModel)]="editorContent"
     (onInit)="onEditorInit($event)"
+    (dblclick)="editSnippet(snippet.id)"
   ></ngx-monaco-editor>
 </div>

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { doc, docData, Firestore } from '@angular/fire/firestore';
 import { map } from 'rxjs';
+import { doc, docData, Firestore } from '@angular/fire/firestore';
 
 import { Snippet } from '../models/snippet';
 
