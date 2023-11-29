@@ -49,6 +49,7 @@
     class="code-editor !h-full"
     [options]="editorOptions"
     [(ngModel)]="editorContent"
+    (ngModelChange)="trackUnsavedChanges($event)"
     (onInit)="onEditorInit($event)"
     (dblclick)="editSnippet(snippet.id)"
   ></ngx-monaco-editor>

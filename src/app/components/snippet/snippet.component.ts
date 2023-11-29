@@ -6,8 +6,9 @@ import { BehaviorSubject, of, switchMap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { SnippetService } from '../../services/snippets.service';
 import { Snippet } from '../../models/snippet';
+import { SnippetService } from '../../services/snippets.service';
+import { TrackUnsavedService } from '../../services/track-unsaved.service';
 
 @Component({
   selector: 'app-snippet',
@@ -35,6 +36,7 @@ import { Snippet } from '../../models/snippet';
 export class SnippetComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private snippetService = inject(SnippetService);
+  private trackUnsavedService = inject(TrackUnsavedService);
   private snippetSubject = new BehaviorSubject<string | null>(null);
 
   private readonly defaultSnippet = {
@@ -72,7 +74,7 @@ export class SnippetComponent implements OnInit {
     this.snippetSubject
       .pipe(
         switchMap((id) => {
-          console.log('id', id);
+          console.log('snippet id', id);
           if (!id) {
             return of(this.defaultSnippet);
           }
@@ -133,12 +135,19 @@ export class SnippetComponent implements OnInit {
   }
 
   cancelUpdateSnippet() {
-    const question = 'Are you sure you want to discard your current changes?';
+    const question =
+      'You have unsaved changes. Are you sure you want to leave?';
+
     // TODO: replace with modal
+    // Modal should be reused on the `unsavedChangesGuard` route guard
     if (window.confirm(question)) {
       this.shouldEdit = false;
       this.updateReadonlyMode(true);
       this.editorContent = this.snippet.content;
     }
+  }
+
+  trackUnsavedChanges(content: string) {
+    this.trackUnsavedService.trackChange(content, this.snippet.content);
   }
 }

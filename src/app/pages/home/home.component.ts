@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { from, map, mergeMap, shareReplay, tap } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -42,6 +42,7 @@ import { SnippetComponent } from '../../components/snippet/snippet.component';
 })
 export class HomeComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private groupsService = inject(GroupsService);
   private listsService = inject(ListsService);
 
@@ -110,5 +111,10 @@ export class HomeComponent implements OnInit {
         open: l.id === listId ? !l.open : l.open,
       };
     });
+  }
+
+  logout() {
+    // TODO: implement later once we have the auth service
+    this.router.navigate(['/login']);
   }
 }

@@ -1,5 +1,8 @@
 <div class="grid h-full grid-cols-4" role="main">
-  <div id="sidebar" class="col-span-1 border-r border-r-gray-400 p-2">
+  <div
+    id="sidebar"
+    class="col-span-1 flex flex-col border-r border-r-gray-400 p-2"
+  >
     <div class="mb-2 flex justify-between">
       <span>My Snippets</span>
       <button type="button" class="inline-flex items-center">
@@ -12,6 +15,9 @@
         [lists]="lists"
         [activeSnippetId]="(activeSnippetId$ | async) || ''"
       ></app-groups>
+    </div>
+    <div class="mt-auto py-2">
+      <button type="button" (click)="logout()">Logout</button>
     </div>
   </div>
   <div id="content" class="col-span-3">
