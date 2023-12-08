@@ -43,12 +43,14 @@ export class SnippetComponent implements OnInit {
     id: '',
     title: 'Untitled',
     content: '',
-    language: 'javascript',
+    language: '',
   } as Snippet;
 
   snippet = this.defaultSnippet;
 
   editorContent = this.snippet.content;
+  editorTitle = this.snippet.title;
+  selectedSnippetLanguage = this.snippet.language;
 
   editorOptions = {
     theme: 'vs-dark',
@@ -91,7 +93,9 @@ export class SnippetComponent implements OnInit {
 
         this.snippet = snippet;
         this.editorContent = this.snippet.content;
-        this.setLanguage(this.snippet.language);
+        this.editorTitle = this.snippet.title;
+        this.selectedSnippetLanguage = this.snippet.language;
+        this.setEditorOptions(this.snippet.language);
       });
   }
 
@@ -106,11 +110,16 @@ export class SnippetComponent implements OnInit {
     }
   }
 
-  setLanguage(langId: string) {
+  setEditorOptions(langId: string) {
     this.editorOptions = {
       ...this.editorOptions,
       language: langId,
     };
+    this.editSnippet(this.snippet.id);
+  }
+
+  selectLanguage(id: string) {
+    this.setEditorOptions(id);
   }
 
   updateReadonlyMode(readOnly: boolean) {
@@ -122,8 +131,7 @@ export class SnippetComponent implements OnInit {
 
   editSnippet(snippetId: string) {
     if (snippetId && !this.shouldEdit) {
-      this.shouldEdit = true;
-      this.updateReadonlyMode(false);
+      this.makeEditable();
     }
   }
 
@@ -132,6 +140,12 @@ export class SnippetComponent implements OnInit {
       this.shouldEdit = false;
       this.updateReadonlyMode(true);
     }
+  }
+
+  updateSnippetTitle(event: Event) {
+    const target = event.target as HTMLElement;
+    console.log(target?.textContent);
+    this.editorTitle = target.textContent || '';
   }
 
   cancelUpdateSnippet() {
@@ -144,10 +158,16 @@ export class SnippetComponent implements OnInit {
       this.shouldEdit = false;
       this.updateReadonlyMode(true);
       this.editorContent = this.snippet.content;
+      this.editorTitle = this.snippet.title;
     }
   }
 
   trackUnsavedChanges(content: string) {
     this.trackUnsavedService.trackChange(content, this.snippet.content);
+  }
+
+  private makeEditable() {
+    this.shouldEdit = true;
+    this.updateReadonlyMode(false);
   }
 }

@@ -11,6 +11,7 @@ import {
   ionSave,
   ionCheckmarkSharp,
   ionClose,
+  ionPencilOutline,
 } from '@ng-icons/ionicons';
 import { simpleJavascript } from '@ng-icons/simple-icons';
 
@@ -31,6 +32,7 @@ import { simpleJavascript } from '@ng-icons/simple-icons';
       ionCheckmarkSharp,
       ionClose,
       simpleJavascript,
+      ionPencilOutline,
     }),
   ],
 })

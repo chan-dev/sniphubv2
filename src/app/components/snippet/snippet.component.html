@@ -1,46 +1,44 @@
-<div class="mb-2 flex justify-between p-2">
-  <span>{{ snippet.title }} </span>
-  <div class="flex items-center gap-1">
-    @if (!shouldEdit) {
-      <button type="button" class="inline-flex items-center">
-        <ng-icon name="ionCopyOutline" class="mr-1"></ng-icon>
-        Copy
-      </button>
-      <button
-        type="button"
-        class="inline-flex items-center"
-        (click)="editSnippet(snippet.id)"
-      >
-        <ng-icon name="ionPencilSharp" class="mr-1"></ng-icon>
-        Edit
-      </button>
-    } @else {
-      <select
-        #langSelect
-        [(ngModel)]="snippet.language"
-        (change)="setLanguage(langSelect.value)"
-      >
-        @for (lang of languages; track lang.id) {
-          <option value="{{ lang.id }}">{{ lang.id }}</option>
-        }
-      </select>
-      <button
-        type="button"
-        class="inline-flex items-center"
-        (click)="saveSnippet(snippet.id)"
-      >
-        <ng-icon name="ionCheckmarkSharp" class="mr-1"></ng-icon>
-        Save
-      </button>
-      <button
-        type="button"
-        class="inline-flex items-center"
-        (click)="cancelUpdateSnippet()"
-      >
-        <ng-icon name="ionClose" class="mr-1"></ng-icon>
-        Cancel
-      </button>
-    }
+<div class="flex items-center justify-between p-2">
+  <div>
+    <span
+      [attr.contenteditable]="shouldEdit"
+      (click)="editSnippet(snippet.id)"
+      (input)="updateSnippetTitle($event)"
+      class="outline-none"
+      [ngClass]="{ 'cursor-pointer': !shouldEdit }"
+      [textContent]="editorTitle"
+    >
+    </span>
+    <ng-icon name="ionPencilOutline" class="ml-1" *ngIf="!shouldEdit"></ng-icon>
+  </div>
+  <div class="flex items-stretch gap-1">
+    <select
+      #langSelect
+      [(ngModel)]="selectedSnippetLanguage"
+      (change)="selectLanguage(langSelect.value)"
+      class="w-[320px] truncate rounded border border-gray-400 p-0.5"
+    >
+      <option value="">Select a language</option>
+      @for (lang of languages; track lang.id) {
+        <option value="{{ lang.id }}">{{ lang.id }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
+      (click)="saveSnippet(snippet.id)"
+      [disabled]="!shouldEdit"
+    >
+      Save
+    </button>
+    <button
+      type="button"
+      class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
+      (click)="cancelUpdateSnippet()"
+      [disabled]="!shouldEdit"
+    >
+      Cancel
+    </button>
   </div>
 </div>
 
