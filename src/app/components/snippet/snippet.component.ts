@@ -9,6 +9,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { Snippet } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
+import { EditorOptions } from '../../types/editor';
 
 @Component({
   selector: 'app-snippet',
@@ -50,9 +51,9 @@ export class SnippetComponent implements OnInit {
 
   editorContent = this.snippet.content;
   editorTitle = this.snippet.title;
-  selectedSnippetLanguage = this.snippet.language;
+  editorLanguage = this.snippet.language;
 
-  editorOptions = {
+  editorOptions: EditorOptions = {
     theme: 'vs-dark',
     language: 'javascript',
     readOnly: true,
@@ -94,8 +95,9 @@ export class SnippetComponent implements OnInit {
         this.snippet = snippet;
         this.editorContent = this.snippet.content;
         this.editorTitle = this.snippet.title;
-        this.selectedSnippetLanguage = this.snippet.language;
-        this.setEditorOptions(this.snippet.language);
+        this.editorLanguage = this.snippet.language;
+
+        this.setEditorOptions({ language: this.snippet.language });
       });
   }
 
@@ -110,23 +112,13 @@ export class SnippetComponent implements OnInit {
     }
   }
 
-  setEditorOptions(langId: string) {
-    this.editorOptions = {
-      ...this.editorOptions,
-      language: langId,
-    };
+  selectLanguage(id: string) {
+    this.setEditorOptions({ language: id });
     this.editSnippet(this.snippet.id);
   }
 
-  selectLanguage(id: string) {
-    this.setEditorOptions(id);
-  }
-
-  updateReadonlyMode(readOnly: boolean) {
-    this.editorOptions = {
-      ...this.editorOptions,
-      readOnly,
-    };
+  updateEditorReadonly(readOnly: boolean) {
+    this.setEditorOptions({ readOnly });
   }
 
   editSnippet(snippetId: string) {
@@ -138,36 +130,54 @@ export class SnippetComponent implements OnInit {
   saveSnippet(snippetId: string) {
     if (snippetId) {
       this.shouldEdit = false;
-      this.updateReadonlyMode(true);
+      this.updateEditorReadonly(true);
     }
   }
 
-  updateSnippetTitle(event: Event) {
+  updateTitle(event: Event) {
     const target = event.target as HTMLElement;
-    console.log(target?.textContent);
     this.editorTitle = target.textContent || '';
   }
 
-  cancelUpdateSnippet() {
+  cancelUpdate() {
     const question =
       'You have unsaved changes. Are you sure you want to leave?';
 
     // TODO: replace with modal
     // Modal should be reused on the `unsavedChangesGuard` route guard
     if (window.confirm(question)) {
-      this.shouldEdit = false;
-      this.updateReadonlyMode(true);
-      this.editorContent = this.snippet.content;
-      this.editorTitle = this.snippet.title;
+      this.resetToDefaults();
     }
+  }
+
+  private resetToDefaults() {
+    this.shouldEdit = false;
+    this.updateEditorReadonly(true);
+    this.editorContent = this.snippet.content;
+    this.editorTitle = this.snippet.title;
+    this.editorLanguage = this.snippet.language;
   }
 
   trackUnsavedChanges(content: string) {
     this.trackUnsavedService.trackChange(content, this.snippet.content);
   }
 
+  private setEditorOptions({
+    language,
+    theme,
+    readOnly,
+    contextmenu,
+  }: Partial<EditorOptions>) {
+    this.editorOptions = {
+      language: language ?? this.editorOptions.language,
+      theme: theme ?? this.editorOptions.theme,
+      readOnly: readOnly ?? this.editorOptions.readOnly,
+      contextmenu: contextmenu ?? this.editorOptions.contextmenu,
+    };
+  }
+
   private makeEditable() {
     this.shouldEdit = true;
-    this.updateReadonlyMode(false);
+    this.updateEditorReadonly(false);
   }
 }

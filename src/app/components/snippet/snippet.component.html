@@ -1,11 +1,13 @@
 <div class="flex items-center justify-between p-2">
-  <div>
+  <div
+    class="inline-flex items-center"
+    [ngClass]="{ 'cursor-pointer': !shouldEdit }"
+    (click)="editSnippet(snippet.id)"
+  >
     <span
       [attr.contenteditable]="shouldEdit"
-      (click)="editSnippet(snippet.id)"
-      (input)="updateSnippetTitle($event)"
+      (input)="updateTitle($event)"
       class="outline-none"
-      [ngClass]="{ 'cursor-pointer': !shouldEdit }"
       [textContent]="editorTitle"
     >
     </span>
@@ -14,7 +16,7 @@
   <div class="flex items-stretch gap-1">
     <select
       #langSelect
-      [(ngModel)]="selectedSnippetLanguage"
+      [(ngModel)]="editorLanguage"
       (change)="selectLanguage(langSelect.value)"
       class="w-[320px] truncate rounded border border-gray-400 p-0.5"
     >
@@ -34,7 +36,7 @@
     <button
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
-      (click)="cancelUpdateSnippet()"
+      (click)="cancelUpdate()"
       [disabled]="!shouldEdit"
     >
       Cancel
