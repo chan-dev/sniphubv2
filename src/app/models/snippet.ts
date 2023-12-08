@@ -7,3 +7,11 @@ export interface Snippet {
   user_id: string;
   list_id: string;
 }
+
+export interface EmbeddedSnippetUnderList {
+  title: string;
+  created_at: number;
+}
+
+export type SaveSnippetDTO = Omit<Snippet, 'id' | 'created_at'>;
+export type UpdateSnippetDTO = Partial<SaveSnippetDTO>;
