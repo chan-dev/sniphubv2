@@ -29,7 +29,7 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="saveSnippet(snippet.id)"
-      [disabled]="!shouldEdit"
+      [disabled]="!shouldEdit || savingInProgress"
     >
       @if (savingInProgress) {
         <ng-icon name="tablerLoader2" class="mr-1 animate-spin"></ng-icon>
@@ -40,7 +40,7 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="cancelUpdate()"
-      [disabled]="!shouldEdit"
+      [disabled]="!shouldEdit || savingInProgress"
     >
       Cancel
     </button>

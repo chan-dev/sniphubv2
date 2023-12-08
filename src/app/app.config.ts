@@ -11,6 +11,7 @@ import {
   MonacoEditorModule,
   NgxMonacoEditorConfig,
 } from 'ngx-monaco-editor-v2';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   // baseUrl: './assets', // configure base path for monaco editor. Starting with version 8.0.0 it defaults to './assets'. Previous releases default to '/assets'
@@ -21,11 +22,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
-    importProvidersFrom(
-      provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    ),
+    importProvidersFrom(provideFirebaseApp(() => initializeApp(environment.firebaseConfig))),
     importProvidersFrom(provideAuth(() => getAuth())),
     importProvidersFrom(provideFirestore(() => getFirestore())),
     importProvidersFrom(MonacoEditorModule.forRoot(monacoConfig)),
-  ],
+    provideAnimations()
+],
 };

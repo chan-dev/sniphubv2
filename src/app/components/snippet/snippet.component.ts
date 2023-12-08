@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, of, switchMap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
@@ -14,7 +15,13 @@ import { EditorOptions } from '../../types/editor';
 @Component({
   selector: 'app-snippet',
   standalone: true,
-  imports: [CommonModule, FormsModule, MonacoEditorModule, NgIconComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MonacoEditorModule,
+    MatSnackBarModule,
+    NgIconComponent,
+  ],
   templateUrl: './snippet.component.html',
   styles: `
     :host {
@@ -36,6 +43,7 @@ import { EditorOptions } from '../../types/editor';
 })
 export class SnippetComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
+  private snackbar = inject(MatSnackBar);
   private snippetService = inject(SnippetService);
   private trackUnsavedService = inject(TrackUnsavedService);
   private snippetSubject = new BehaviorSubject<string | null>(null);
@@ -155,8 +163,11 @@ export class SnippetComponent implements OnInit {
         this.savingInProgress = false;
         this.shouldEdit = false;
         this.updateEditorReadonly(true);
+
+        this.openSnackbar('Snippet saved');
       } catch (error) {
         console.error(error);
+        this.openSnackbar('Failed to save snippet');
       }
     }
   }
@@ -175,6 +186,13 @@ export class SnippetComponent implements OnInit {
     if (window.confirm(question)) {
       this.resetToDefaults();
     }
+  }
+
+  openSnackbar(message: string) {
+    this.snackbar.open(message, 'Close', {
+      duration: 3000,
+      verticalPosition: 'top',
+    });
   }
 
   private resetToDefaults() {
