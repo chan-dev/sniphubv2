@@ -3,4 +3,7 @@ export interface EditorOptions {
   language: string;
   readOnly: boolean;
   contextmenu: boolean;
+  minimap?: {
+    enabled: boolean;
+  };
 }

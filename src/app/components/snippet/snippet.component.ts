@@ -58,6 +58,9 @@ export class SnippetComponent implements OnInit {
     language: 'javascript',
     readOnly: true,
     contextmenu: false,
+    minimap: {
+      enabled: false,
+    },
   };
 
   languages: any[] = [];
@@ -188,6 +191,7 @@ export class SnippetComponent implements OnInit {
     contextmenu,
   }: Partial<EditorOptions>) {
     this.editorOptions = {
+      ...this.editorOptions,
       language: language ?? this.editorOptions.language,
       theme: theme ?? this.editorOptions.theme,
       readOnly: readOnly ?? this.editorOptions.readOnly,
