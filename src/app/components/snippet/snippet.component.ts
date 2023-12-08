@@ -6,7 +6,7 @@ import { BehaviorSubject, of, switchMap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { Snippet } from '../../models/snippet';
+import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
@@ -127,10 +127,29 @@ export class SnippetComponent implements OnInit {
     }
   }
 
-  saveSnippet(snippetId: string) {
+  async saveSnippet(snippetId: string) {
     if (snippetId) {
-      this.shouldEdit = false;
-      this.updateEditorReadonly(true);
+      try {
+        // TODO: add alert
+        const data: UpdateSnippetDTO = {
+          content: this.editorContent,
+          language: this.editorLanguage,
+        };
+
+        if (this.editorTitle !== this.snippet.title) {
+          data.title = this.editorTitle;
+        }
+
+        await this.snippetService.updateSnippet(
+          snippetId,
+          this.snippet.list_id,
+          data,
+        );
+        this.shouldEdit = false;
+        this.updateEditorReadonly(true);
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 

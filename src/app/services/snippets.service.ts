@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
-import { doc, docData, Firestore } from '@angular/fire/firestore';
+import { doc, docData, Firestore, writeBatch } from '@angular/fire/firestore';
 
-import { Snippet } from '../models/snippet';
+import { UpdateSnippetDTO, Snippet } from '../models/snippet';
 
 @Injectable({ providedIn: 'root' })
 export class SnippetService {
@@ -16,5 +16,25 @@ export class SnippetService {
         return snippet as Snippet;
       }),
     );
+  }
+
+  updateSnippet(id: string, list_id: string, snippet: UpdateSnippetDTO) {
+    const batch = writeBatch(this.db);
+
+    const embeddedSnippetUnderListRef = doc(this.db, 'lists', list_id);
+
+    const snippetDocRef = doc(this.db, 'snippets', id);
+
+    batch.update(snippetDocRef, {
+      ...snippet,
+    });
+
+    if (snippet.title) {
+      batch.update(embeddedSnippetUnderListRef, `snippets.${id}`, {
+        title: snippet.title,
+      });
+    }
+
+    return batch.commit();
   }
 }
