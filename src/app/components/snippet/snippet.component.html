@@ -31,6 +31,9 @@
       (click)="saveSnippet(snippet.id)"
       [disabled]="!shouldEdit"
     >
+      @if (savingInProgress) {
+        <ng-icon name="tablerLoader2" class="mr-1 animate-spin"></ng-icon>
+      }
       Save
     </button>
     <button

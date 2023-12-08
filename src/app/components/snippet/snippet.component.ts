@@ -53,6 +53,8 @@ export class SnippetComponent implements OnInit {
   editorTitle = this.snippet.title;
   editorLanguage = this.snippet.language;
 
+  savingInProgress = false;
+
   editorOptions: EditorOptions = {
     theme: 'vs-dark',
     language: 'javascript',
@@ -133,6 +135,7 @@ export class SnippetComponent implements OnInit {
   async saveSnippet(snippetId: string) {
     if (snippetId) {
       try {
+        this.savingInProgress = true;
         // TODO: add alert
         const data: UpdateSnippetDTO = {
           content: this.editorContent,
@@ -148,6 +151,8 @@ export class SnippetComponent implements OnInit {
           this.snippet.list_id,
           data,
         );
+
+        this.savingInProgress = false;
         this.shouldEdit = false;
         this.updateEditorReadonly(true);
       } catch (error) {

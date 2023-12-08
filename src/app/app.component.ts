@@ -14,6 +14,7 @@ import {
   ionPencilOutline,
 } from '@ng-icons/ionicons';
 import { simpleJavascript } from '@ng-icons/simple-icons';
+import { tablerLoader2 } from '@ng-icons/tabler-icons';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +34,7 @@ import { simpleJavascript } from '@ng-icons/simple-icons';
       ionClose,
       simpleJavascript,
       ionPencilOutline,
+      tablerLoader2,
     }),
   ],
 })
