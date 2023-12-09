@@ -16,3 +16,12 @@ body {
   padding-top: 0px;
   padding-bottom: 0px;
 }
+
+.mat-mdc-menu-item {
+  line-height: theme("lineHeight.3") !important;
+  min-height: theme("height.10") !important;
+}
+
+span.mat-mdc-menu-item-text {
+  font-size: theme("fontSize.sm") !important;
+}
