@@ -1,10 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 import { CollapsibleGroup } from '../../models/group';
 import { CollapsibleList } from '../../models/list';
 import { ListComponent } from '../list/list.component';
+import { ContextMenuDirective } from '../../directives/context-menu.directive';
 
 @Component({
   selector: 'app-groups',
@@ -16,7 +18,13 @@ import { ListComponent } from '../list/list.component';
     width: 100%;
   }
   `,
-  imports: [CommonModule, NgIconComponent, ListComponent],
+  imports: [
+    CommonModule,
+    MatMenuModule,
+    NgIconComponent,
+    ListComponent,
+    ContextMenuDirective,
+  ],
 })
 export class GroupsComponent {
   @Input() groups!: CollapsibleGroup[];
@@ -39,5 +47,12 @@ export class GroupsComponent {
         open: l.id === listId ? !l.open : l.open,
       };
     });
+  }
+
+  editGroup(id: string) {
+    console.log('editGroup', id);
+  }
+  deleteGroup(id: string) {
+    console.log('deleteGroup', id);
   }
 }

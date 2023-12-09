@@ -1,15 +1,22 @@
-import { Component, Input, ViewChild, inject } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
-import { MatMenu, MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 import { CollapsibleList } from '../../models/list';
+import { ContextMenuDirective } from '../../directives/context-menu.directive';
 
 @Component({
   selector: 'app-list',
   standalone: true,
-  imports: [CommonModule, MatMenuModule, NgIconComponent, RouterLink],
+  imports: [
+    CommonModule,
+    MatMenuModule,
+    NgIconComponent,
+    RouterLink,
+    ContextMenuDirective,
+  ],
   templateUrl: './list.component.html',
   styles: ``,
 })
@@ -19,12 +26,17 @@ export class ListComponent {
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
 
-  openMenu(event: MouseEvent) {
-    event.preventDefault();
-    this.menuTrigger.toggleMenu();
+  editList(id: string) {
+    console.log('editList', id);
+  }
+  deleteList(id: string) {
+    console.log('deleteList', id);
   }
 
-  disableContextMenu() {
-    this.menuTrigger.closeMenu();
+  editSnippet(id: string) {
+    console.log('editSnippet', id);
+  }
+  deleteSnippet(id: string) {
+    console.log('deleteSnippet', id);
   }
 }

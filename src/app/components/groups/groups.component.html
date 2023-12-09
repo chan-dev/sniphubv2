@@ -1,6 +1,11 @@
 <ul class="flex w-full">
   @for (group of groups; track group.id) {
-    <li class="w-[100px] flex-1 cursor-pointer" (click)="toggleGroup(group.id)">
+    <li
+      class="w-[100px] flex-1 cursor-pointer"
+      (click)="toggleGroup(group.id)"
+      [matMenuTriggerFor]="groupMenu"
+      preventDefault
+    >
       <span class="inline-flex items-center">
         @if (lists[group.id]?.length) {
           <ng-icon
@@ -23,6 +28,10 @@
           }
         </ul>
       }
+      <mat-menu #groupMenu="matMenu" [hasBackdrop]="false">
+        <button mat-menu-item (click)="editGroup(group.id)">Edit</button>
+        <button mat-menu-item (click)="deleteGroup(group.id)">Delete</button>
+      </mat-menu>
     </li>
   }
 </ul>
