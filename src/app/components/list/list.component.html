@@ -1,4 +1,10 @@
-<span class="inline-flex items-center">
+<span
+  class="inline-flex items-center"
+  (contextmenu)="$event.preventDefault(); listMenuTrigger.toggleMenu()"
+  (click)="listMenuTrigger.closeMenu()"
+  [matMenuTriggerFor]="groupMenu"
+  #listMenuTrigger="matMenuTrigger"
+>
   @if ((list.snippets | keyvalue).length > 0) {
     <ng-icon
       [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
@@ -11,7 +17,13 @@
 @if (list.open && (list.snippets | keyvalue).length) {
   <ul (click)="$event.stopPropagation()">
     @for (snippet of list.snippets | keyvalue; track snippet.key) {
-      <li class="relative pl-4">
+      <li
+        class="relative pl-4"
+        (contextmenu)="$event.preventDefault(); groupMenuTrigger.toggleMenu()"
+        (click)="groupMenuTrigger.closeMenu()"
+        [matMenuTriggerFor]="listMenu"
+        #groupMenuTrigger="matMenuTrigger"
+      >
         <a routerLink="." [queryParams]="{ snippetId: snippet.key }">{{
           snippet.value.title
         }}</a>
@@ -26,3 +38,14 @@
     }
   </ul>
 }
+
+<!-- TODO: use angular directive overriding -->
+<mat-menu #groupMenu="matMenu" [hasBackdrop]="false">
+  <button mat-menu-item>Group Item 1</button>
+  <button mat-menu-item>Group Item 2</button>
+</mat-menu>
+
+<mat-menu #listMenu="matMenu" [hasBackdrop]="false">
+  <button mat-menu-item>List Item 1</button>
+  <button mat-menu-item>List Item 2</button>
+</mat-menu>
