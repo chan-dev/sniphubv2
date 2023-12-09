@@ -7,6 +7,7 @@ import { CollapsibleGroup } from '../../models/group';
 import { CollapsibleList } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-groups',
@@ -24,6 +25,7 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
     NgIconComponent,
     ListComponent,
     ContextMenuDirective,
+    ClickOutsideDirective,
   ],
 })
 export class GroupsComponent {
