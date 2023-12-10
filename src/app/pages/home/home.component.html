@@ -20,7 +20,12 @@
       <button type="button" (click)="logout()">Logout</button>
     </div>
   </div>
+
   <div id="content" class="col-span-3">
-    <app-snippet [snippetId]="(activeSnippetId$ | async) || ''"></app-snippet>
+    @if (activeSnippetId$ | async; as snippetId) {
+      <app-snippet [snippetId]="snippetId"></app-snippet>
+    } @else {
+      <p>default view</p>
+    }
   </div>
 </div>
