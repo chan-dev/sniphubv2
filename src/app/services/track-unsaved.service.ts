@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TrackUnsavedService {
-  hasUnsavedChanges = false;
+  private readonly hasUnsavedSubject = new BehaviorSubject<boolean>(false);
+  hasUnsaved$ = this.hasUnsavedSubject.asObservable();
 
-  trackChange(before: string, after: string) {
-    this.hasUnsavedChanges = before !== after;
+  trackChange(hasChanged: boolean) {
+    this.hasUnsavedSubject.next(hasChanged);
   }
 
   reset() {
-    this.hasUnsavedChanges = false;
+    this.hasUnsavedSubject.next(false);
   }
 }

@@ -11,7 +11,6 @@ import { ClickOutsideDirective } from './click-outside.directive';
     '(clickOutside)': 'disableContextMenu($event)',
   },
   hostDirectives: [
-    // Directive composition
     {
       directive: ClickOutsideDirective,
       outputs: ['appClickOutside:clickOutside'],

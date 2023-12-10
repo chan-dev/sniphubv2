@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { from, map, mergeMap, shareReplay, tap } from 'rxjs';
+import { from, map, mergeMap, shareReplay } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -51,7 +51,6 @@ export class HomeComponent implements OnInit {
   lists: Record<string, CollapsibleList[] | undefined> = {};
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
-    tap((params) => console.log('params', params)),
     map((params) => params.get('snippetId')),
     shareReplay(1),
   );

@@ -1,23 +1,42 @@
 <div class="flex items-center justify-between p-2">
   <div
     class="inline-flex items-center"
-    [ngClass]="{ 'cursor-pointer': !shouldEdit }"
-    (click)="editSnippet(snippet.id)"
+    [ngClass]="{ 'cursor-pointer': !isEditInProgress }"
+    (click)="setTitleEditable(true)"
   >
-    <span
-      [attr.contenteditable]="shouldEdit"
-      (input)="updateTitle($event)"
-      class="outline-none"
-      [textContent]="editorTitle"
-    >
-    </span>
-    <ng-icon name="ionPencilOutline" class="ml-1"></ng-icon>
+    @if (!isTitleEditable) {
+      <span
+        [attr.contenteditable]="isTitleEditable"
+        class="outline-none"
+        [textContent]="editorTitle"
+      >
+      </span>
+      <ng-icon name="ionPencilOutline" class="ml-1"></ng-icon>
+    } @else {
+      <div class="inline-flex items-stretch">
+        <input
+          type="text"
+          class="rounded-l border border-gray-400 p-0.5 outline-none"
+          [(ngModel)]="editorTitle"
+          (ngModelChange)="updateTitle()"
+          autofocus
+        />
+        <button
+          type="button"
+          class="rounded-r bg-blue-600 px-2 py-0.5 text-white"
+          (click)="setTitleEditable(false); $event.stopPropagation()"
+        >
+          Update
+        </button>
+      </div>
+    }
   </div>
+
   <div class="flex items-stretch gap-1">
     <select
       #langSelect
       [(ngModel)]="editorLanguage"
-      (change)="selectLanguage(langSelect.value)"
+      (change)="updateEditorLanguage(langSelect.value)"
       class="w-[320px] truncate rounded border border-gray-400 p-0.5"
     >
       <option value="">Select a language</option>
@@ -29,7 +48,7 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="saveSnippet(snippet.id)"
-      [disabled]="!shouldEdit || savingInProgress"
+      [disabled]="!isEditInProgress || savingInProgress"
     >
       @if (savingInProgress) {
         <ng-icon name="tablerLoader2" class="mr-1 animate-spin"></ng-icon>
@@ -40,7 +59,7 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="cancelUpdate()"
-      [disabled]="!shouldEdit || savingInProgress"
+      [disabled]="!isEditInProgress || savingInProgress"
     >
       Cancel
     </button>
@@ -52,8 +71,7 @@
     class="code-editor !h-full"
     [options]="editorOptions"
     [(ngModel)]="editorContent"
-    (ngModelChange)="trackUnsavedChanges($event)"
+    (ngModelChange)="updateEditorContent($event)"
     (onInit)="onEditorInit($event)"
-    (dblclick)="editSnippet(snippet.id)"
   ></ngx-monaco-editor>
 </div>

@@ -2,7 +2,7 @@ import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, of, switchMap } from 'rxjs';
+import { BehaviorSubject, of, switchMap, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -11,6 +11,7 @@ import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
+import { AutoFocusDirective } from '../../directives/auto-focus.directive';
 
 @Component({
   selector: 'app-snippet',
@@ -21,6 +22,7 @@ import { EditorOptions } from '../../types/editor';
     MonacoEditorModule,
     MatSnackBarModule,
     NgIconComponent,
+    AutoFocusDirective,
   ],
   templateUrl: './snippet.component.html',
   styles: `
@@ -42,6 +44,14 @@ import { EditorOptions } from '../../types/editor';
   providers: [],
 })
 export class SnippetComponent implements OnInit {
+  @Input() set snippetId(id: string) {
+    if (!id) {
+      return;
+    }
+
+    this.snippetSubject.next(id);
+  }
+
   private destroyRef = inject(DestroyRef);
   private snackbar = inject(MatSnackBar);
   private snippetService = inject(SnippetService);
@@ -66,7 +76,7 @@ export class SnippetComponent implements OnInit {
   editorOptions: EditorOptions = {
     theme: 'vs-dark',
     language: 'javascript',
-    readOnly: true,
+    readOnly: false,
     contextmenu: false,
     minimap: {
       enabled: false,
@@ -75,20 +85,15 @@ export class SnippetComponent implements OnInit {
 
   languages: any[] = [];
 
-  shouldEdit = false;
-
-  @Input() set snippetId(id: string) {
-    if (!id) {
-      return;
-    }
-
-    console.log('snippetId', id);
-    this.snippetSubject.next(id);
-  }
+  isEditInProgress = false;
+  hasUnsavedChanges = false;
+  isTitleEditable = false;
 
   ngOnInit(): void {
+    console.log('snippet component ngOnInit');
     this.snippetSubject
       .pipe(
+        tap(() => this.resetToDefaults()),
         switchMap((id) => {
           console.log('snippet id', id);
           if (!id) {
@@ -112,6 +117,19 @@ export class SnippetComponent implements OnInit {
 
         this.setEditorOptions({ language: this.snippet.language });
       });
+
+    this.trackUnsavedService.hasUnsaved$
+      .pipe(
+        tap((hasChanged) => console.log(`hasChanged`, hasChanged)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((value) => {
+        this.isEditInProgress = value;
+
+        if (!value) {
+          this.resetToDefaults();
+        }
+      });
   }
 
   onEditorInit(_editor: any) {
@@ -125,19 +143,34 @@ export class SnippetComponent implements OnInit {
     }
   }
 
-  selectLanguage(id: string) {
-    this.setEditorOptions({ language: id });
-    this.editSnippet(this.snippet.id);
-  }
-
   updateEditorReadonly(readOnly: boolean) {
     this.setEditorOptions({ readOnly });
   }
 
-  editSnippet(snippetId: string) {
-    if (snippetId && !this.shouldEdit) {
-      this.makeEditable();
+  updateTitle() {
+    // const target = event.target as HTMLElement;
+    // this.editorTitle = target.textContent || '';
+    this.trackUnsavedService.trackChange(true);
+  }
+
+  updateEditorLanguage(id: string) {
+    this.setEditorOptions({ language: id });
+    this.trackUnsavedService.trackChange(true);
+  }
+
+  updateEditorContent(content: string) {
+    if (content !== this.snippet.content) {
+      this.trackUnsavedService.trackChange(true);
     }
+  }
+
+  makeEditorTitleEditable(id: string) {
+    // Add visual cue for editing
+    this.isTitleEditable = true;
+  }
+
+  setTitleEditable(open: boolean) {
+    this.isTitleEditable = open;
   }
 
   async saveSnippet(snippetId: string) {
@@ -161,20 +194,15 @@ export class SnippetComponent implements OnInit {
         );
 
         this.savingInProgress = false;
-        this.shouldEdit = false;
-        this.updateEditorReadonly(true);
-
+        // this.shouldEdit = false;
+        this.trackUnsavedService.trackChange(false);
+        // this.updateEditorReadonly(true);
         this.openSnackbar('Snippet saved');
       } catch (error) {
         console.error(error);
         this.openSnackbar('Failed to save snippet');
       }
     }
-  }
-
-  updateTitle(event: Event) {
-    const target = event.target as HTMLElement;
-    this.editorTitle = target.textContent || '';
   }
 
   cancelUpdate() {
@@ -185,6 +213,7 @@ export class SnippetComponent implements OnInit {
     // Modal should be reused on the `unsavedChangesGuard` route guard
     if (window.confirm(question)) {
       this.resetToDefaults();
+      this.trackUnsavedService.reset();
     }
   }
 
@@ -196,15 +225,11 @@ export class SnippetComponent implements OnInit {
   }
 
   private resetToDefaults() {
-    this.shouldEdit = false;
-    this.updateEditorReadonly(true);
+    this.isTitleEditable = false;
     this.editorContent = this.snippet.content;
     this.editorTitle = this.snippet.title;
     this.editorLanguage = this.snippet.language;
-  }
-
-  trackUnsavedChanges(content: string) {
-    this.trackUnsavedService.trackChange(content, this.snippet.content);
+    this.hasUnsavedChanges = false;
   }
 
   private setEditorOptions({
@@ -220,10 +245,5 @@ export class SnippetComponent implements OnInit {
       readOnly: readOnly ?? this.editorOptions.readOnly,
       contextmenu: contextmenu ?? this.editorOptions.contextmenu,
     };
-  }
-
-  private makeEditable() {
-    this.shouldEdit = true;
-    this.updateEditorReadonly(false);
   }
 }
