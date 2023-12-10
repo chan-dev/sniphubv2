@@ -1,7 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { from, map, mergeMap, shareReplay } from 'rxjs';
+import {
+  ActivatedRoute,
+  Router,
+  RouterLink,
+  RouterOutlet,
+} from '@angular/router';
+import { from, map, mergeMap, shareReplay, tap } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -28,6 +33,7 @@ import { SnippetComponent } from '../../components/snippet/snippet.component';
     NgIconComponent,
     GroupsComponent,
     SnippetComponent,
+    RouterLink,
   ],
   templateUrl: './home.component.html',
   styles: [],
