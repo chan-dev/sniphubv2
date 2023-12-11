@@ -20,7 +20,7 @@ import { CollapsibleList } from '../../models/list';
 import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
-import { GroupsComponent } from '../../components/groups/groups.component';
+import { ListGroupComponent } from '../../components/list-group/list-group.component';
 
 @Component({
   selector: 'app-home',
@@ -42,7 +42,7 @@ import { GroupsComponent } from '../../components/groups/groups.component';
     NgIconComponent,
     SnippetComponent,
     RouterLink,
-    GroupsComponent,
+    ListGroupComponent,
     ListComponent,
   ],
 })

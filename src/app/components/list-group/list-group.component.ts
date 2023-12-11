@@ -9,9 +9,9 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
-  selector: 'app-groups',
+  selector: 'app-list-group',
   standalone: true,
-  templateUrl: './groups.component.html',
+  templateUrl: './list-group.component.html',
   styles: `
   :host {
     display: block;
@@ -27,7 +27,7 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
     ClickOutsideDirective,
   ],
 })
-export class GroupsComponent {
+export class ListGroupComponent {
   @Input() lists: CollapsibleList[] = [];
   @Input() activeSnippetId?: string;
 

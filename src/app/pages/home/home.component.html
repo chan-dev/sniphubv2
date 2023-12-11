@@ -10,10 +10,10 @@
       </button>
     </div>
     <div class="flex items-center">
-      <app-groups
+      <app-list-group
         [lists]="lists"
         [activeSnippetId]="(activeSnippetId$ | async) || ''"
-      ></app-groups>
+      ></app-list-group>
     </div>
     <div class="mt-auto py-2">
       <button type="button" (click)="logout()">Logout</button>
