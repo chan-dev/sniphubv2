@@ -18,7 +18,11 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
     ContextMenuDirective,
   ],
   templateUrl: './list.component.html',
-  styles: ``,
+  styles: `
+    ng-icon {
+      margin-left: -3px;
+    }
+  `,
 })
 export class ListComponent {
   @Input() list!: CollapsibleList;

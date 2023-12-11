@@ -1,36 +1,16 @@
 <ul class="flex w-full">
-  @for (group of groups; track group.id) {
+  @for (list of lists; track list.id) {
     <li
       class="w-[100px] flex-1 cursor-pointer"
-      (click)="toggleGroup(group.id)"
-      [matMenuTriggerFor]="groupMenu"
+      (click)="toggleSnippets(list.id)"
+      [matMenuTriggerFor]="listMenu"
       preventDefault
     >
-      <span class="inline-flex items-center">
-        @if (lists[group.id]?.length) {
-          <ng-icon
-            [name]="group.open ? 'ionChevronDown' : 'ionChevronForward'"
-          ></ng-icon>
-        }
+      <app-list [list]="list" [activeSnippetId]="activeSnippetId"></app-list>
 
-        {{ group.name }}
-      </span>
-
-      @if (group.open && lists[group.id]?.length) {
-        <ul (click)="$event.stopPropagation()">
-          @for (list of lists[group.id]; track list.id) {
-            <li class="pl-4" (click)="toggleSnippets(group.id, list.id)">
-              <app-list
-                [list]="list"
-                [activeSnippetId]="activeSnippetId"
-              ></app-list>
-            </li>
-          }
-        </ul>
-      }
-      <mat-menu #groupMenu="matMenu" [hasBackdrop]="false">
-        <button mat-menu-item (click)="editGroup(group.id)">Edit</button>
-        <button mat-menu-item (click)="deleteGroup(group.id)">Delete</button>
+      <mat-menu #listMenu="matMenu" [hasBackdrop]="false">
+        <button mat-menu-item (click)="editList(list.id)">Edit</button>
+        <button mat-menu-item (click)="deleteList(list.id)">Delete</button>
       </mat-menu>
     </li>
   }

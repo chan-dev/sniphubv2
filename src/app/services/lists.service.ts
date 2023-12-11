@@ -26,10 +26,10 @@ export class ListsService {
     );
   }
 
-  getLists(groupId: string) {
+  getLists(uid: string) {
     const queryRef = query(
       collection(this.db, 'lists'),
-      where('group_id', '==', groupId),
+      where('user_id', '==', uid),
     );
 
     return collectionData(queryRef, {
