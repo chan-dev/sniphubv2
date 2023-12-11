@@ -4,7 +4,7 @@
       class="w-[100px] flex-1 cursor-pointer"
       (click)="toggleSnippets(list.id)"
       [matMenuTriggerFor]="listMenu"
-      preventDefault
+      isContextMenu
     >
       <app-list [list]="list" [activeSnippetId]="activeSnippetId"></app-list>
 

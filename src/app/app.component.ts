@@ -12,6 +12,7 @@ import {
   ionCheckmarkSharp,
   ionClose,
   ionPencilOutline,
+  ionEllipsisHorizontal,
 } from '@ng-icons/ionicons';
 import { simpleJavascript } from '@ng-icons/simple-icons';
 import { tablerLoader2 } from '@ng-icons/tabler-icons';
@@ -27,6 +28,7 @@ import { tablerLoader2 } from '@ng-icons/tabler-icons';
       ionAdd,
       ionCopyOutline,
       ionChevronForward,
+      ionEllipsisHorizontal,
       ionChevronDown,
       ionPencilSharp,
       ionSave,

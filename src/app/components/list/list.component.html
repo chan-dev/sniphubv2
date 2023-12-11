@@ -1,8 +1,4 @@
-<span
-  class="inline-flex items-center"
-  [matMenuTriggerFor]="listMenu"
-  preventDefault
->
+<span class="inline-flex items-center">
   @if ((list.snippets | keyvalue).length > 0) {
     <ng-icon
       [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
@@ -15,7 +11,7 @@
 @if (list.open && (list.snippets | keyvalue).length) {
   <ul (click)="$event.stopPropagation()">
     @for (snippet of list.snippets | keyvalue; track snippet.key) {
-      <li class="relative pl-4" [matMenuTriggerFor]="listMenu" preventDefault>
+      <li class="relative pl-4" [matMenuTriggerFor]="snippetMenu" isContextMenu>
         <a routerLink="." [queryParams]="{ snippetId: snippet.key }">{{
           snippet.value.title
         }}</a>
@@ -27,7 +23,7 @@
           ></div>
         }
 
-        <mat-menu #listMenu="matMenu" [hasBackdrop]="false">
+        <mat-menu #snippetMenu="matMenu" [hasBackdrop]="false">
           <button mat-menu-item (click)="editSnippet(snippet.key)">Edit</button>
           <button mat-menu-item (click)="deleteSnippet(snippet.key)">
             Delete
@@ -37,8 +33,3 @@
     }
   </ul>
 }
-
-<mat-menu #listMenu="matMenu" [hasBackdrop]="false">
-  <button mat-menu-item (click)="editList(list.id)">Edit</button>
-  <button mat-menu-item (click)="deleteList(list.id)">Delete</button>
-</mat-menu>

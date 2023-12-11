@@ -6,7 +6,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { CollapsibleList } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
-import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-list-group',
@@ -24,7 +23,6 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
     NgIconComponent,
     ListComponent,
     ContextMenuDirective,
-    ClickOutsideDirective,
   ],
 })
 export class ListGroupComponent {

@@ -1,14 +1,15 @@
 import { Directive, inject } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
+
 import { ClickOutsideDirective } from './click-outside.directive';
 
 @Directive({
-  selector: '[matMenuTriggerFor][preventDefault]',
+  selector: '[matMenuTriggerFor][isContextMenu]',
   standalone: true,
   host: {
     '(contextmenu)': 'handleContextMenu($event)',
-    '(click)': 'disableContextMenu($event)',
-    '(clickOutside)': 'disableContextMenu($event)',
+    '(click)': 'closeContextMenu($event)',
+    '(clickOutside)': 'closeContextMenu($event)',
   },
   hostDirectives: [
     {
@@ -27,7 +28,9 @@ export class ContextMenuDirective {
     this.menu.toggleMenu();
   }
 
-  disableContextMenu(event: MouseEvent) {
+  closeContextMenu(event: MouseEvent) {
     this.menu.closeMenu();
+    event.stopPropagation();
+    console.log('ContextMenuDirective: closeContextMenu');
   }
 }
