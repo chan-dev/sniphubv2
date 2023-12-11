@@ -20,7 +20,11 @@ export class ClickOutsideDirective {
 
   handleClick(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.appClickOutside.emit();
+      this.appClickOutside.emit(event);
     }
+
+    // Use this instead of stopPropagation so it also stops
+    // propagation the event handler on the same element (in this case `document`)
+    event.stopImmediatePropagation();
   }
 }
