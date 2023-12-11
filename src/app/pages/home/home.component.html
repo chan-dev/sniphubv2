@@ -5,8 +5,13 @@
   >
     <div class="mb-2 flex justify-between">
       <a routerLink="/">My Snippets</a>
-      <button type="button" class="inline-flex items-center">
-        <ng-icon name="ionAdd"></ng-icon>
+      <button
+        type="button"
+        class="inline-flex items-center"
+        [matMenuTriggerFor]="rootMenu"
+        isDropdownMenu
+      >
+        <ng-icon name="ionEllipsisHorizontal"></ng-icon>
       </button>
     </div>
     <div class="flex items-center">
@@ -28,3 +33,8 @@
     }
   </div>
 </div>
+
+<mat-menu #rootMenu="matMenu" [hasBackdrop]="false" xPosition="before">
+  <button mat-menu-item>Edit</button>
+  <button mat-menu-item>Delete</button>
+</mat-menu>

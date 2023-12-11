@@ -7,6 +7,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { map, shareReplay } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -21,6 +22,7 @@ import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
+import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
 
 @Component({
   selector: 'app-home',
@@ -39,11 +41,13 @@ import { ListGroupComponent } from '../../components/list-group/list-group.compo
     CommonModule,
     RouterOutlet,
     MonacoEditorModule,
+    MatMenuModule,
     NgIconComponent,
     SnippetComponent,
     RouterLink,
     ListGroupComponent,
     ListComponent,
+    DropdownMenuDirective,
   ],
 })
 export class HomeComponent implements OnInit {
