@@ -9,9 +9,9 @@
       #name="ngModel"
     />
     <!-- Add explicit height to prevent UI layout shifts -->
-    <span class="block h-[20px]">
-      @if (name.invalid) {
-        <span class="text-sm peer-invalid:text-red-700">Name is required</span>
+    <span class="block h-[20px] peer-invalid:text-red-700">
+      @if (name.invalid && (name.touched || name.dirty)) {
+        <span class="text-sm">Name is required</span>
       }
     </span>
   </p>
