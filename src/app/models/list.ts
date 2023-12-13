@@ -3,7 +3,7 @@ export interface List {
   name: string;
   created_at: number;
   uid: string;
-  snippets: Record<
+  snippets?: Record<
     string,
     {
       created_at: number;
@@ -15,3 +15,5 @@ export interface List {
 export interface CollapsibleList extends List {
   open: boolean;
 }
+
+export type NewListDTO = Omit<List, 'id' | 'created_at' | 'snippets'>;
