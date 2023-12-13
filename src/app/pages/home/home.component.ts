@@ -8,6 +8,7 @@ import {
 } from '@angular/router';
 import { map, shareReplay } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -23,6 +24,7 @@ import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
 import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
+import { ModalComponent } from '../../ui/libs/modal/modal.component';
 
 @Component({
   selector: 'app-home',
@@ -46,6 +48,7 @@ import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive'
     SnippetComponent,
     RouterLink,
     ListGroupComponent,
+    ModalComponent,
     ListComponent,
     DropdownMenuDirective,
   ],
@@ -53,6 +56,7 @@ import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive'
 export class HomeComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
 
   lists: CollapsibleList[] = [];
@@ -87,5 +91,18 @@ export class HomeComponent implements OnInit {
   logout() {
     // TODO: implement later once we have the auth service
     this.router.navigate(['/login']);
+  }
+
+  openListModal() {
+    const dialogRef = this.dialog.open(ModalComponent, {
+      data: {
+        list: 'my list',
+      },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('The dialog was closed', { result });
+    });
   }
 }

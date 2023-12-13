@@ -35,6 +35,6 @@
 </div>
 
 <mat-menu #rootMenu="matMenu" [hasBackdrop]="false" xPosition="before">
-  <button mat-menu-item>Edit</button>
-  <button mat-menu-item>Delete</button>
+  <button mat-menu-item (click)="openListModal()">New List</button>
+  <button mat-menu-item>New Snippet</button>
 </mat-menu>

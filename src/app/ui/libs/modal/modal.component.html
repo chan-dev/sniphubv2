@@ -1,0 +1,36 @@
+<h3 mat-dialog-title class="!py-1 text-base">Add new list</h3>
+<div mat-dialog-content class="!pb-2">
+  <p class="flex flex-col">
+    <input
+      type="text"
+      class="peer w-full border p-2 text-sm invalid:outline-red-700"
+      [(ngModel)]="data.list"
+      required
+      #name="ngModel"
+    />
+    <!-- Add explicit height to prevent UI layout shifts -->
+    <span class="block h-[20px]">
+      @if (name.invalid) {
+        <span class="text-sm peer-invalid:text-red-700">Name is required</span>
+      }
+    </span>
+  </p>
+</div>
+<div mat-dialog-actions class="flex !min-h-fit !justify-end gap-2 !px-6">
+  <button
+    class="rounded border px-1 py-0.5"
+    type="button"
+    (click)="dialogRef.close()"
+  >
+    Cancel
+  </button>
+  <button
+    class="rounded border bg-blue-700 px-1 py-0.5 text-white disabled:opacity-50"
+    mat-button
+    [mat-dialog-close]="data.list"
+    cdkFocusInitial
+    [disabled]="name.invalid"
+  >
+    Create
+  </button>
+</div>
