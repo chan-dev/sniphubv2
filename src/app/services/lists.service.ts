@@ -29,7 +29,7 @@ export class ListsService {
   getLists(uid: string) {
     const queryRef = query(
       collection(this.db, 'lists'),
-      where('user_id', '==', uid),
+      where('uid', '==', uid),
     );
 
     return collectionData(queryRef, {

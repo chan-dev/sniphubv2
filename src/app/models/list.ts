@@ -2,8 +2,7 @@ export interface List {
   id: string;
   name: string;
   created_at: number;
-  user_id: string;
-  group_id: string;
+  uid: string;
   snippets: Record<
     string,
     {
