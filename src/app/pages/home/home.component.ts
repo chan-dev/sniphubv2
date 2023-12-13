@@ -18,7 +18,7 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { CollapsibleList } from '../../models/list';
+import { CollapsibleList, NewListDTO } from '../../models/list';
 import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
@@ -95,14 +95,32 @@ export class HomeComponent implements OnInit {
 
   openListModal() {
     const dialogRef = this.dialog.open(ModalComponent, {
-      data: {
-        list: 'my list',
-      },
       disableClose: true,
+      data: {
+        list: '',
+      },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('The dialog was closed', { result });
+    dialogRef.afterClosed().subscribe((list) => {
+      console.log('The dialog was closed', { list });
+
+      // call save list service to create new list
+      const newList: NewListDTO = {
+        name: list,
+        uid: 'YNcQBgiyZ5ANasIrvH5p',
+      };
+
+      this.listsService.createList(newList).subscribe({
+        next: (data) => {
+          console.log('List created', {
+            data: data,
+          });
+        },
+        // FIXME: error is not being caught from firstore addDoc
+        error: (err) => {
+          console.error(`Caught error: ${err}`);
+        },
+      });
     });
   }
 }

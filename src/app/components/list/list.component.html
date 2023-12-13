@@ -1,14 +1,12 @@
 <span class="inline-flex items-center">
-  @if ((list.snippets | keyvalue).length > 0) {
-    <ng-icon
-      [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
-    ></ng-icon>
-  }
+  <ng-icon
+    [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
+  ></ng-icon>
 
   {{ list.name }}
 </span>
 
-@if (list.open && (list.snippets | keyvalue).length) {
+@if (list.open && (list.snippets | keyvalue)?.length) {
   <ul (click)="$event.stopPropagation()">
     @for (snippet of list.snippets | keyvalue; track snippet.key) {
       <li class="relative pl-4" [matMenuTriggerFor]="snippetMenu" isContextMenu>
