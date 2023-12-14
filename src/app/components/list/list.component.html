@@ -1,12 +1,12 @@
-<span class="inline-flex items-center">
+<span class="inline-flex items-center" (click)="toggleList()">
   <ng-icon
-    [name]="list.open ? 'ionChevronDown' : 'ionChevronForward'"
+    [name]="isExpanded ? 'ionChevronDown' : 'ionChevronForward'"
   ></ng-icon>
 
   {{ list.name }}
 </span>
 
-@if (list.open && (list.snippets | keyvalue)?.length) {
+@if (isExpanded && (list.snippets | keyvalue)?.length) {
   <ul (click)="$event.stopPropagation()">
     @for (snippet of list.snippets | keyvalue; track snippet.key) {
       <li class="relative pl-4" [matMenuTriggerFor]="snippetMenu" isContextMenu>

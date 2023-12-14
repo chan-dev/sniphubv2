@@ -4,7 +4,7 @@ import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 
-import { CollapsibleList, EditListDTO } from '../../models/list';
+import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
@@ -31,21 +31,12 @@ import { SnackbarService } from '../../services/snackbar.service';
   ],
 })
 export class ListGroupComponent {
-  @Input() lists: CollapsibleList[] = [];
+  @Input() lists: List[] = [];
   @Input() activeSnippetId?: string;
 
   private listsService = inject(ListsService);
   private dialog = inject(MatDialog);
   private snackbarService = inject(SnackbarService);
-
-  toggleSnippets(listId: string) {
-    this.lists = this.lists.map((l) => {
-      return {
-        ...l,
-        open: l.id === listId ? !l.open : l.open,
-      };
-    });
-  }
 
   editList(list: EditListDTO) {
     console.log('editList', list);

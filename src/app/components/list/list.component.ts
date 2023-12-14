@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
-import { CollapsibleList } from '../../models/list';
+import { List } from '../../models/list';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
 
 @Component({
@@ -25,10 +25,12 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
   `,
 })
 export class ListComponent {
-  @Input() list!: CollapsibleList;
+  @Input() list!: List;
   @Input() activeSnippetId?: string;
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
+
+  isExpanded = false;
 
   editList(id: string) {
     console.log('editList', id);
@@ -42,5 +44,9 @@ export class ListComponent {
   }
   deleteSnippet(id: string) {
     console.log('deleteSnippet', id);
+  }
+
+  toggleList() {
+    this.isExpanded = !this.isExpanded;
   }
 }

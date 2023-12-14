@@ -18,7 +18,7 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { CollapsibleList, NewListDTO } from '../../models/list';
+import { List, NewListDTO } from '../../models/list';
 import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
@@ -59,7 +59,7 @@ export class HomeComponent implements OnInit {
   private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
 
-  lists: CollapsibleList[] = [];
+  lists: List[] = [];
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -70,21 +70,7 @@ export class HomeComponent implements OnInit {
     const userId = 'YNcQBgiyZ5ANasIrvH5p';
 
     return this.listsService.getLists(userId).subscribe((lists) => {
-      this.lists = lists.map((l) => {
-        return {
-          ...l,
-          open: false,
-        };
-      });
-    });
-  }
-
-  toggleSnippets(listId: string) {
-    this.lists = this.lists.map((l) => {
-      return {
-        ...l,
-        open: l.id === listId ? !l.open : l.open,
-      };
+      this.lists = lists;
     });
   }
 
