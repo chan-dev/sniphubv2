@@ -8,6 +8,7 @@ import { CollapsibleList, EditListDTO } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
+import { ConfirmModalComponent } from '../../ui/libs/confirm-modal/confirm-modal.component';
 import { ListsService } from '../../services/lists.service';
 import { SnackbarService } from '../../services/snackbar.service';
 
@@ -71,6 +72,21 @@ export class ListGroupComponent {
 
   deleteList(id: string) {
     console.log('deleteList', id);
+
+    const dialogRef = this.dialog.open(ConfirmModalComponent, {
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((shouldDelete) => {
+      if (!shouldDelete) {
+        return;
+      }
+
+      this.listsService.deleteList(id).subscribe((result) => {
+        console.log('delete succesful', result);
+        this.openSnackbar('List deleted');
+      });
+    });
   }
 
   openSnackbar(message: string) {

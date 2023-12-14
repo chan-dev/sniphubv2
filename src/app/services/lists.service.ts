@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   collectionData,
+  deleteDoc,
   doc,
   docData,
   query,
@@ -71,6 +72,17 @@ export class ListsService {
       name: list.name,
     });
     return scheduled(updateListDoc, asyncScheduler).pipe(
+      // FIXME: error is not being caught from firstore addDoc
+      catchError((err) => {
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  deleteList(id: string) {
+    const listRef = doc(this.db, `lists/${id}`);
+    const deleteListDoc = deleteDoc(listRef);
+    return scheduled(deleteListDoc, asyncScheduler).pipe(
       // FIXME: error is not being caught from firstore addDoc
       catchError((err) => {
         return throwError(() => err);
