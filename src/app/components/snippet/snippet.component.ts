@@ -5,10 +5,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, of, switchMap, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
+import { SnackbarService } from '../../services/snackbar.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
 import { AutoFocusDirective } from '../../directives/auto-focus.directive';
@@ -53,8 +54,8 @@ export class SnippetComponent implements OnInit {
   }
 
   private destroyRef = inject(DestroyRef);
-  private snackbar = inject(MatSnackBar);
   private snippetService = inject(SnippetService);
+  private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
   private snippetSubject = new BehaviorSubject<string | null>(null);
 
@@ -218,10 +219,7 @@ export class SnippetComponent implements OnInit {
   }
 
   openSnackbar(message: string) {
-    this.snackbar.open(message, 'Close', {
-      duration: 3000,
-      verticalPosition: 'top',
-    });
+    this.snackbarService.openSnackbar(message);
   }
 
   private resetToDefaults() {

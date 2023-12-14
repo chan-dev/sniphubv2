@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -20,7 +21,7 @@ import { tablerLoader2 } from '@ng-icons/tabler-icons';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, MatSnackBarModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   viewProviders: [
