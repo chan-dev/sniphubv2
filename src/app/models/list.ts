@@ -17,3 +17,4 @@ export interface CollapsibleList extends List {
 }
 
 export type NewListDTO = Omit<List, 'id' | 'created_at' | 'snippets'>;
+export type EditListDTO = Pick<List, 'id' | 'name'>;

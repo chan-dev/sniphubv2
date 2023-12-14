@@ -1,11 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 
-import { CollapsibleList } from '../../models/list';
+import { CollapsibleList, EditListDTO } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
+import { ModalComponent } from '../../ui/libs/modal/modal.component';
+import { ListsService } from '../../services/lists.service';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-list-group',
@@ -29,6 +33,10 @@ export class ListGroupComponent {
   @Input() lists: CollapsibleList[] = [];
   @Input() activeSnippetId?: string;
 
+  private listsService = inject(ListsService);
+  private dialog = inject(MatDialog);
+  private snackbarService = inject(SnackbarService);
+
   toggleSnippets(listId: string) {
     this.lists = this.lists.map((l) => {
       return {
@@ -38,10 +46,34 @@ export class ListGroupComponent {
     });
   }
 
-  editList(id: string) {
-    console.log('editList', id);
+  editList(list: EditListDTO) {
+    console.log('editList', list);
+
+    const dialogRef = this.dialog.open(ModalComponent, {
+      disableClose: true,
+      data: {
+        listName: list.name,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((listName) => {
+      const editListDTO: EditListDTO = {
+        id: list.id,
+        name: listName,
+      };
+
+      this.listsService.editList(editListDTO).subscribe((result) => {
+        console.log('edit succesful', result);
+        this.openSnackbar('List updated');
+      });
+    });
   }
+
   deleteList(id: string) {
     console.log('deleteList', id);
+  }
+
+  openSnackbar(message: string) {
+    this.snackbarService.openSnackbar(message);
   }
 }

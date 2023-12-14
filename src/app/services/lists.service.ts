@@ -8,11 +8,12 @@ import {
   docData,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from '@angular/fire/firestore';
 import { asyncScheduler, catchError, map, scheduled, throwError } from 'rxjs';
 
-import { List, NewListDTO } from '../models/list';
+import { EditListDTO, List, NewListDTO } from '../models/list';
 
 @Injectable({ providedIn: 'root' })
 export class ListsService {
@@ -57,6 +58,19 @@ export class ListsService {
     // });
 
     return scheduled(newListDoc, asyncScheduler).pipe(
+      // FIXME: error is not being caught from firstore addDoc
+      catchError((err) => {
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  editList(list: EditListDTO) {
+    const listRef = doc(this.db, `lists/${list.id}`);
+    const updateListDoc = updateDoc(listRef, {
+      name: list.name,
+    });
+    return scheduled(updateListDoc, asyncScheduler).pipe(
       // FIXME: error is not being caught from firstore addDoc
       catchError((err) => {
         return throwError(() => err);
