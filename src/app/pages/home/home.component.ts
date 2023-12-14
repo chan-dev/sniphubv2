@@ -97,16 +97,16 @@ export class HomeComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: true,
       data: {
-        list: '',
+        listName: '',
       },
     });
 
-    dialogRef.afterClosed().subscribe((list) => {
-      console.log('The dialog was closed', { list });
+    dialogRef.afterClosed().subscribe((listName) => {
+      console.log('The dialog was closed', { listName });
 
       // call save list service to create new list
       const newList: NewListDTO = {
-        name: list,
+        name: listName,
         uid: 'YNcQBgiyZ5ANasIrvH5p',
       };
 

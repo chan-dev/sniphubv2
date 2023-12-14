@@ -4,7 +4,7 @@
     <input
       type="text"
       class="peer w-full border p-2 text-sm invalid:outline-red-700"
-      [(ngModel)]="data.list"
+      [(ngModel)]="data.listName"
       required
       #name="ngModel"
     />
@@ -27,7 +27,7 @@
   <button
     class="rounded border bg-blue-700 px-1 py-0.5 text-white disabled:opacity-50"
     mat-button
-    [mat-dialog-close]="data.list"
+    [mat-dialog-close]="data.listName"
     cdkFocusInitial
     [disabled]="name.invalid"
   >

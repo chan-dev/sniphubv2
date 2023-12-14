@@ -10,7 +10,7 @@ import {
 } from '@angular/material/dialog';
 
 interface DialogData {
-  list: string;
+  listName: string;
 }
 
 @Component({
