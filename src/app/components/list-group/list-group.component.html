@@ -1,7 +1,7 @@
 <ul class="flex w-full flex-col">
   @for (list of lists; track list.id) {
     <li
-      class="w-[100px] flex-1 cursor-pointer"
+      class="w-full flex-1 cursor-pointer"
       (click)="toggleSnippets(list.id)"
       [matMenuTriggerFor]="listMenu"
       isContextMenu
@@ -9,7 +9,12 @@
       <app-list [list]="list" [activeSnippetId]="activeSnippetId"></app-list>
 
       <mat-menu #listMenu="matMenu" [hasBackdrop]="false">
-        <button mat-menu-item (click)="editList(list.id)">Edit</button>
+        <button
+          mat-menu-item
+          (click)="editList({ id: list.id, name: list.name })"
+        >
+          Rename
+        </button>
         <button mat-menu-item (click)="deleteList(list.id)">Delete</button>
       </mat-menu>
     </li>
