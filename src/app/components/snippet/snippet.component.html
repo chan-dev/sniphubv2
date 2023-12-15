@@ -4,7 +4,7 @@
     [ngClass]="{ 'cursor-pointer': !isEditInProgress }"
     (click)="setTitleEditable(true)"
   >
-    @if (!isTitleEditable) {
+    @if (!isTitleEditable || savingInProgress) {
       <span
         [attr.contenteditable]="isTitleEditable"
         class="outline-none"
@@ -21,13 +21,16 @@
           (ngModelChange)="updateTitle()"
           autofocus
         />
-        <button
-          type="button"
-          class="rounded-r bg-blue-600 px-2 py-0.5 text-white"
-          (click)="setTitleEditable(false); $event.stopPropagation()"
-        >
-          Update
-        </button>
+        @if (!savingInProgress) {
+          <button
+            type="button"
+            class="rounded-r bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
+            (click)="setTitleEditable(false); $event.stopPropagation()"
+            [disabled]="savingInProgress"
+          >
+            Update
+          </button>
+        }
       </div>
     }
   </div>

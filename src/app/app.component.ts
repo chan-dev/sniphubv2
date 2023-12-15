@@ -14,8 +14,9 @@ import {
   ionClose,
   ionPencilOutline,
   ionEllipsisHorizontal,
+  ionCodeSlashOutline,
 } from '@ng-icons/ionicons';
-import { simpleJavascript } from '@ng-icons/simple-icons';
+import { simpleJavascript, simpleGoogle } from '@ng-icons/simple-icons';
 import { tablerLoader2 } from '@ng-icons/tabler-icons';
 
 @Component({
@@ -35,7 +36,9 @@ import { tablerLoader2 } from '@ng-icons/tabler-icons';
       ionSave,
       ionCheckmarkSharp,
       ionClose,
+      ionCodeSlashOutline,
       simpleJavascript,
+      simpleGoogle,
       ionPencilOutline,
       tablerLoader2,
     }),
