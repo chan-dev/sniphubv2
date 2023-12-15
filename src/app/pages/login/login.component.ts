@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { signInWithPopup } from '@angular/fire/auth';
 import { NgIconComponent } from '@ng-icons/core';
+
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,4 +13,16 @@ import { NgIconComponent } from '@ng-icons/core';
   templateUrl: './login.component.html',
   styles: ``,
 })
-export class LoginComponent {}
+export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  async login() {
+    try {
+      await this.authService.login();
+      this.router.navigate(['/home']);
+    } catch (error) {
+      console.log('error', { error });
+    }
+  }
+}

@@ -25,6 +25,7 @@ import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
 import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -58,6 +59,7 @@ export class HomeComponent implements OnInit {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
+  private authService = inject(AuthService);
 
   lists: List[] = [];
 
@@ -74,9 +76,13 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  logout() {
-    // TODO: implement later once we have the auth service
-    this.router.navigate(['/login']);
+  async logout() {
+    try {
+      await this.authService.logout();
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.log('error', { error });
+    }
   }
 
   openListModal() {
