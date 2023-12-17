@@ -3,7 +3,13 @@
   <p class="flex flex-col">
     <input
       type="text"
-      class="peer w-full border p-2 text-sm invalid:outline-red-700"
+      class="peer w-full border p-2 text-sm"
+      [ngClass]="{
+        '!border-red-700': name.invalid && (name.touched || name.dirty)
+      }"
+      [ngStyle]="{
+        '--tw-ring-color': 'transparent'
+      }"
       [(ngModel)]="data.listName"
       required
       #name="ngModel"

@@ -1,5 +1,6 @@
-import { Component, NgModule, inject } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { NgClass, NgStyle } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
   MatDialogTitle,
   MatDialogContent,
@@ -22,6 +23,8 @@ interface DialogData {
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
+    NgClass,
+    NgStyle,
   ],
   templateUrl: './modal.component.html',
   styles: ``,
