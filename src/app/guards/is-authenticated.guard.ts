@@ -10,12 +10,12 @@ export const isAuthenticatedGuard: CanMatchFn = (route, segments) => {
 
   console.log('isAuthenticatedGuard triggered', route.path);
 
-  return authService.isAuthenticated$.pipe(
-    tap((isAuthenticated) => {
-      console.log('isAuthenticated', { isAuthenticated });
+  return authService.currentUser$.pipe(
+    tap((currentUser) => {
+      console.log('currentUser', { currentUser });
     }),
-    map((isAuthenticated) => {
-      if (!isAuthenticated) {
+    map((currentUser) => {
+      if (!currentUser) {
         return router.parseUrl('/login');
       }
       return true;

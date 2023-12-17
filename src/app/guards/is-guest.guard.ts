@@ -10,12 +10,12 @@ export const isGuestGuard: CanMatchFn = (route, segments) => {
 
   console.log('isGuestGuard triggered', route.path);
 
-  return authService.isAuthenticated$.pipe(
-    tap((isAuthenticated) => {
-      console.log('isAuthenticated', { isAuthenticated });
+  return authService.currentUser$.pipe(
+    tap((currentUser) => {
+      console.log('currentUser', { currentUser });
     }),
-    map((isAuthenticated) => {
-      if (isAuthenticated) {
+    map((currentUser) => {
+      if (currentUser) {
         return router.parseUrl('/home');
       }
       return true;

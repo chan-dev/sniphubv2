@@ -40,17 +40,17 @@ import {
   templateUrl: './modal.component.html',
   styles: ``,
 })
-export class ModalComponent<T> {
+export class ModalComponent {
   @Input() titleTemplateRef: TemplateRef<any> | undefined;
   @Input() bodyTemplateRef: TemplateRef<any> | undefined;
   @Input() ctaTemplateRef: TemplateRef<any> | undefined;
-
-  dialogRef = inject(MatDialogRef<ModalComponent<T>>);
 
   @Input() title = 'Title here';
   @Input() body = 'Message here';
   @Input() confirmButtonLabel = 'Ok';
   @Input() cancelButtonLabel = 'Cancel';
+
+  dialogRef = inject(MatDialogRef<ModalComponent>);
 
   titleContext = {
     title: this.title,

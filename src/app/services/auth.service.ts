@@ -2,27 +2,32 @@ import { Injectable, inject } from '@angular/core';
 import {
   Auth,
   GoogleAuthProvider,
+  User,
   onAuthStateChanged,
   signInWithPopup,
   signOut,
 } from '@angular/fire/auth';
-import { Subject, shareReplay } from 'rxjs';
+import { Subject, shareReplay, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private auth = inject(Auth);
-  private isAuthenticatedSubject = new Subject<boolean>();
-  isAuthenticated$ = this.isAuthenticatedSubject
-    .asObservable()
-    .pipe(shareReplay(1));
+  private authSubject = new Subject<User | null>();
+
+  currentUser$ = this.authSubject.asObservable().pipe(
+    tap((user) => (this.currentUser = user)),
+    shareReplay(1),
+  );
+
+  currentUser: User | null = null;
 
   constructor() {
     console.log('AuthService initialized');
     onAuthStateChanged(this.auth, (user) => {
       console.log('onAuthStateChanged', user);
-      this.isAuthenticatedSubject.next(!!user);
+      this.authSubject.next(user);
     });
   }
 

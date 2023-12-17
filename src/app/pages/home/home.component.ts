@@ -74,6 +74,7 @@ export class HomeComponent implements OnInit {
 
   lists: List[] = [];
   listName = '';
+  currentUser = this.authService.currentUser;
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -81,7 +82,11 @@ export class HomeComponent implements OnInit {
   );
 
   ngOnInit() {
-    const userId = 'YNcQBgiyZ5ANasIrvH5p';
+    const userId = this.currentUser?.uid;
+
+    if (!userId) {
+      return;
+    }
 
     return this.listsService.getLists(userId).subscribe((lists) => {
       this.lists = lists;
