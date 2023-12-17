@@ -7,14 +7,15 @@ import {
   deleteDoc,
   doc,
   docData,
+  orderBy,
   query,
-  serverTimestamp,
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { asyncScheduler, catchError, map, scheduled, throwError } from 'rxjs';
+import { defer, map } from 'rxjs';
 
-import { EditListDTO, List, NewListDTO } from '../models/list';
+import { EditListDTO, List, NewListWithTimestampDTO } from '../models/list';
+import { promisify } from '../utils/promise';
 
 @Injectable({ providedIn: 'root' })
 export class ListsService {
@@ -34,6 +35,7 @@ export class ListsService {
     const queryRef = query(
       collection(this.db, 'lists'),
       where('uid', '==', uid),
+      orderBy('created_at', 'asc'),
     );
 
     return collectionData(queryRef, {
@@ -45,48 +47,32 @@ export class ListsService {
     );
   }
 
-  createList(newList: NewListDTO) {
+  createList(newList: NewListWithTimestampDTO) {
     const collectionRef = collection(this.db, `lists`);
 
-    const newListDoc = addDoc(collectionRef, {
-      name: newList.name,
-      uid: newList.uid,
-      created_at: serverTimestamp(),
+    return defer(() => {
+      let newListDocPromise = promisify(addDoc)(collectionRef, newList);
+      return newListDocPromise;
     });
-
-    // return defer(async () => {
-    //   return await newListDoc;
-    // });
-
-    return scheduled(newListDoc, asyncScheduler).pipe(
-      // FIXME: error is not being caught from firstore addDoc
-      catchError((err) => {
-        return throwError(() => err);
-      }),
-    );
   }
 
   editList(list: EditListDTO) {
     const listRef = doc(this.db, `lists/${list.id}`);
-    const updateListDoc = updateDoc(listRef, {
-      name: list.name,
+
+    return defer(() => {
+      const updateListDocPromise = promisify(updateDoc)(listRef, {
+        name: list.name,
+      });
+      return updateListDocPromise;
     });
-    return scheduled(updateListDoc, asyncScheduler).pipe(
-      // FIXME: error is not being caught from firstore addDoc
-      catchError((err) => {
-        return throwError(() => err);
-      }),
-    );
   }
 
   deleteList(id: string) {
     const listRef = doc(this.db, `lists/${id}`);
-    const deleteListDoc = deleteDoc(listRef);
-    return scheduled(deleteListDoc, asyncScheduler).pipe(
-      // FIXME: error is not being caught from firstore addDoc
-      catchError((err) => {
-        return throwError(() => err);
-      }),
-    );
+
+    return defer(() => {
+      const deleteListDocPromise = promisify(deleteDoc)(listRef);
+      return deleteListDocPromise;
+    });
   }
 }

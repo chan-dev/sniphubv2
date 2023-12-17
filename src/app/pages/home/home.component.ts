@@ -9,6 +9,7 @@ import {
 import { map, shareReplay } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
+import { serverTimestamp } from '@angular/fire/firestore';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -18,7 +19,7 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { List, NewListDTO } from '../../models/list';
+import { List, NewListWithTimestampDTO } from '../../models/list';
 import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
@@ -97,9 +98,10 @@ export class HomeComponent implements OnInit {
       console.log('The dialog was closed', { listName });
 
       // call save list service to create new list
-      const newList: NewListDTO = {
+      const newList: NewListWithTimestampDTO = {
         name: listName,
         uid: 'YNcQBgiyZ5ANasIrvH5p',
+        created_at: serverTimestamp(),
       };
 
       this.listsService.createList(newList).subscribe({
@@ -108,7 +110,6 @@ export class HomeComponent implements OnInit {
             data: data,
           });
         },
-        // FIXME: error is not being caught from firstore addDoc
         error: (err) => {
           console.error(`Caught error: ${err}`);
         },

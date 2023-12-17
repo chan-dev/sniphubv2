@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase/firestore';
+
 export interface List {
   id: string;
   name: string;
@@ -13,4 +15,7 @@ export interface List {
 }
 
 export type NewListDTO = Omit<List, 'id' | 'created_at' | 'snippets'>;
+export type NewListWithTimestampDTO = NewListDTO & {
+  created_at: FieldValue;
+};
 export type EditListDTO = Pick<List, 'id' | 'name'>;
