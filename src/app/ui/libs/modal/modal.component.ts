@@ -1,5 +1,17 @@
-import { NgClass, NgStyle } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import {
+  NgClass,
+  NgIf,
+  NgIfContext,
+  NgStyle,
+  NgTemplateOutlet,
+} from '@angular/common';
+import {
+  Component,
+  Input,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MatDialogTitle,
@@ -9,10 +21,6 @@ import {
   MatDialogRef,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
-
-interface DialogData {
-  listName: string;
-}
 
 @Component({
   selector: 'app-modal',
@@ -25,11 +33,26 @@ interface DialogData {
     MatDialogClose,
     NgClass,
     NgStyle,
+    // NgIf,
+    // NgIfContext
+    NgTemplateOutlet,
   ],
   templateUrl: './modal.component.html',
   styles: ``,
 })
-export class ModalComponent {
-  dialogRef = inject(MatDialogRef<ModalComponent>);
-  data = inject<DialogData>(MAT_DIALOG_DATA);
+export class ModalComponent<T> {
+  @Input() titleTemplateRef: TemplateRef<any> | undefined;
+  @Input() bodyTemplateRef: TemplateRef<any> | undefined;
+  @Input() ctaTemplateRef: TemplateRef<any> | undefined;
+
+  dialogRef = inject(MatDialogRef<ModalComponent<T>>);
+
+  @Input() title = 'Title here';
+  @Input() body = 'Message here';
+  @Input() confirmButtonLabel = 'Ok';
+  @Input() cancelButtonLabel = 'Cancel';
+
+  titleContext = {
+    title: this.title,
+  };
 }

@@ -1,4 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ActivatedRoute,
@@ -6,6 +12,7 @@ import {
   RouterLink,
   RouterOutlet,
 } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { map, shareReplay } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
@@ -47,6 +54,7 @@ import { AuthService } from '../../services/auth.service';
     MonacoEditorModule,
     MatMenuModule,
     NgIconComponent,
+    FormsModule,
     SnippetComponent,
     RouterLink,
     ListGroupComponent,
@@ -62,7 +70,10 @@ export class HomeComponent implements OnInit {
   private listsService = inject(ListsService);
   private authService = inject(AuthService);
 
+  @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
+
   lists: List[] = [];
+  listName = '';
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -89,17 +100,21 @@ export class HomeComponent implements OnInit {
   openListModal() {
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: true,
-      data: {
-        listName: '',
-      },
     });
 
-    dialogRef.afterClosed().subscribe((listName) => {
-      console.log('The dialog was closed', { listName });
+    dialogRef.componentInstance.title = 'Create new list';
+    dialogRef.componentInstance.bodyTemplateRef = this.bodyTemplateRef;
+    dialogRef.componentInstance.confirmButtonLabel = 'Create';
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      console.log('The dialog was closed', { confirm });
+      if (!confirm) {
+        return;
+      }
 
       // call save list service to create new list
       const newList: NewListWithTimestampDTO = {
-        name: listName,
+        name: this.listName,
         uid: 'YNcQBgiyZ5ANasIrvH5p',
         created_at: serverTimestamp(),
       };
@@ -109,6 +124,7 @@ export class HomeComponent implements OnInit {
           console.log('List created', {
             data: data,
           });
+          this.listName = '';
         },
         error: (err) => {
           console.error(`Caught error: ${err}`);

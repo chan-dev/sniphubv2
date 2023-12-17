@@ -1,5 +1,12 @@
-import { Component, Input, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,7 +15,6 @@ import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
-import { ConfirmModalComponent } from '../../ui/libs/confirm-modal/confirm-modal.component';
 import { ListsService } from '../../services/lists.service';
 import { SnackbarService } from '../../services/snackbar.service';
 
@@ -24,6 +30,7 @@ import { SnackbarService } from '../../services/snackbar.service';
   `,
   imports: [
     CommonModule,
+    FormsModule,
     MatMenuModule,
     NgIconComponent,
     ListComponent,
@@ -34,29 +41,41 @@ export class ListGroupComponent {
   @Input() lists: List[] = [];
   @Input() activeSnippetId?: string;
 
+  @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
+
   private listsService = inject(ListsService);
   private dialog = inject(MatDialog);
   private snackbarService = inject(SnackbarService);
+
+  listName = '';
 
   editList(list: EditListDTO) {
     console.log('editList', list);
 
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: true,
-      data: {
-        listName: list.name,
-      },
     });
 
-    dialogRef.afterClosed().subscribe((listName) => {
+    this.listName = list.name;
+
+    dialogRef.componentInstance.title = 'Edit list';
+    dialogRef.componentInstance.bodyTemplateRef = this.bodyTemplateRef;
+    dialogRef.componentInstance.confirmButtonLabel = 'Save';
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      if (!confirm) {
+        return;
+      }
+
       const editListDTO: EditListDTO = {
         id: list.id,
-        name: listName,
+        name: this.listName,
       };
 
       this.listsService.editList(editListDTO).subscribe((result) => {
         console.log('edit succesful', result);
         this.openSnackbar('List updated');
+        this.listName = '';
       });
     });
   }
@@ -64,12 +83,17 @@ export class ListGroupComponent {
   deleteList(id: string) {
     console.log('deleteList', id);
 
-    const dialogRef = this.dialog.open(ConfirmModalComponent, {
+    const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: false,
     });
 
-    dialogRef.afterClosed().subscribe((shouldDelete) => {
-      if (!shouldDelete) {
+    dialogRef.componentInstance.title = 'Delete list';
+    dialogRef.componentInstance.body =
+      'Are you sure you want to delete this list?';
+    dialogRef.componentInstance.confirmButtonLabel = 'Delete';
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      if (!confirm) {
         return;
       }
 
