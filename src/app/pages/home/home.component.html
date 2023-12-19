@@ -5,14 +5,19 @@
   >
     <div class="mb-2 flex justify-between">
       <a routerLink="/">My Snippets</a>
+
+      <div class="flex">
         <button
           type="button"
           class="inline-flex items-center"
-          [matMenuTriggerFor]="rootMenu"
-          isDropdownMenu
+          (click)="openListModal()"
         >
-          <ng-icon name="ionEllipsisHorizontal"></ng-icon>
+          <ng-icon
+            name="ionAddCircleOutline"
+            style="--ng-icon__size: 1.5em"
+          ></ng-icon>
         </button>
+      </div>
     </div>
     <div class="flex items-center">
       <app-list-group
@@ -33,11 +38,6 @@
     }
   </div>
 </div>
-
-<mat-menu #rootMenu="matMenu" [hasBackdrop]="false" xPosition="before">
-  <button mat-menu-item (click)="openListModal()">New List</button>
-  <button mat-menu-item>New Snippet</button>
-</mat-menu>
 
 <ng-template #bodyTemplateRef>
   <p class="flex flex-col">
