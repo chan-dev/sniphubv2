@@ -77,6 +77,7 @@ export class HomeComponent implements OnInit {
   lists: List[] = [];
   listName = '';
   currentUser = this.authService.currentUser;
+  currentUserId = this.currentUser?.uid;
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -84,13 +85,11 @@ export class HomeComponent implements OnInit {
   );
 
   ngOnInit() {
-    const userId = this.currentUser?.uid;
-
-    if (!userId) {
+    if (!this.currentUserId) {
       return;
     }
 
-    return this.listsService.getLists(userId).subscribe((lists) => {
+    return this.listsService.getLists(this.currentUserId).subscribe((lists) => {
       this.lists = lists;
     });
   }
@@ -119,10 +118,15 @@ export class HomeComponent implements OnInit {
         return;
       }
 
+      if (!this.currentUserId) {
+        console.error('Not allowed to create a list without a user id');
+        return;
+      }
+
       // call save list service to create new list
       const newList: NewListWithTimestampDTO = {
         name: this.listName,
-        uid: 'YNcQBgiyZ5ANasIrvH5p',
+        uid: this.currentUserId,
         created_at: serverTimestamp(),
       };
 
