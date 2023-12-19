@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import {
   collection,
+  deleteField,
   doc,
   docData,
   Firestore,
@@ -74,6 +75,19 @@ export class SnippetService {
         title: snippet.title,
       });
     }
+
+    return batch.commit();
+  }
+
+  deleteSnippet(id: string, listId: string) {
+    const batch = writeBatch(this.db);
+    // TODO: should we wrap this in Observable?
+    // return deleteDoc(doc(this.db, 'snippets', id));
+    const snippetDocRef = doc(this.db, 'snippets', id);
+    batch.delete(snippetDocRef);
+
+    const listDocRef = doc(this.db, 'lists', listId);
+    batch.update(listDocRef, `snippets.${id}`, deleteField());
 
     return batch.commit();
   }
