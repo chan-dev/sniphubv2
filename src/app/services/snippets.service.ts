@@ -1,8 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
-import { doc, docData, Firestore, writeBatch } from '@angular/fire/firestore';
+import {
+  collection,
+  doc,
+  docData,
+  Firestore,
+  serverTimestamp,
+  writeBatch,
+} from '@angular/fire/firestore';
 
-import { UpdateSnippetDTO, Snippet } from '../models/snippet';
+import {
+  UpdateSnippetDTO,
+  Snippet,
+  SaveSnippetDTO,
+  SaveSnippetWithTimestampDTO,
+  EmbeddedSnippetUnderList,
+} from '../models/snippet';
 
 @Injectable({ providedIn: 'root' })
 export class SnippetService {
@@ -16,6 +29,33 @@ export class SnippetService {
         return snippet as Snippet;
       }),
     );
+  }
+
+  addSnippet(snippet: SaveSnippetDTO) {
+    const listId = snippet.list_id;
+
+    const batch = writeBatch(this.db);
+
+    const snippetsCollectionRef = collection(this.db, 'snippets');
+    const newSnippetDocRef = doc(snippetsCollectionRef);
+    const newSnippetId = newSnippetDocRef.id;
+    const newSnippet: SaveSnippetWithTimestampDTO = {
+      ...snippet,
+      created_at: serverTimestamp(),
+    };
+
+    batch.set(newSnippetDocRef, newSnippet);
+
+    const listDocRef = doc(this.db, 'lists', listId);
+
+    const embeddedSnippet: EmbeddedSnippetUnderList = {
+      title: snippet.title,
+      created_at: serverTimestamp(),
+    };
+
+    batch.update(listDocRef, `snippets.${newSnippetId}`, embeddedSnippet);
+
+    return batch.commit();
   }
 
   updateSnippet(id: string, list_id: string, snippet: UpdateSnippetDTO) {

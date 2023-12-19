@@ -17,6 +17,9 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { ListsService } from '../../services/lists.service';
 import { SnackbarService } from '../../services/snackbar.service';
+import { SaveSnippetDTO } from '../../models/snippet';
+import { AuthService } from '../../services/auth.service';
+import { SnippetService } from '../../services/snippets.service';
 
 @Component({
   selector: 'app-list-group',
@@ -41,13 +44,22 @@ export class ListGroupComponent {
   @Input() lists: List[] = [];
   @Input() activeSnippetId?: string;
 
-  @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
+  @ViewChild('editListBodyTemplateRef')
+  editListBodyTemplateRef!: TemplateRef<any>;
+  @ViewChild('addSnippetBodyTemplateRef')
+  addSnippetBodyTemplateRef!: TemplateRef<any>;
 
-  private listsService = inject(ListsService);
   private dialog = inject(MatDialog);
+  private authService = inject(AuthService);
+  private listsService = inject(ListsService);
+  private snippetsService = inject(SnippetService);
+
   private snackbarService = inject(SnackbarService);
 
   listName = '';
+  snippetName = '';
+  currentUser = this.authService.currentUser;
+  currentUserId = this.currentUser?.uid;
 
   editList(list: EditListDTO) {
     console.log('editList', list);
@@ -59,7 +71,7 @@ export class ListGroupComponent {
     this.listName = list.name;
 
     dialogRef.componentInstance.title = 'Edit list';
-    dialogRef.componentInstance.bodyTemplateRef = this.bodyTemplateRef;
+    dialogRef.componentInstance.bodyTemplateRef = this.editListBodyTemplateRef;
     dialogRef.componentInstance.confirmButtonLabel = 'Save';
 
     dialogRef.afterClosed().subscribe((confirm) => {
@@ -101,6 +113,40 @@ export class ListGroupComponent {
         console.log('delete succesful', result);
         this.openSnackbar('List deleted');
       });
+    });
+  }
+
+  openSnippetModal(listId: string) {
+    const dialogRef = this.dialog.open(ModalComponent, {
+      disableClose: false,
+    });
+
+    dialogRef.componentInstance.title = 'Add snippet';
+    dialogRef.componentInstance.bodyTemplateRef =
+      this.addSnippetBodyTemplateRef;
+    dialogRef.componentInstance.confirmButtonLabel = 'Add';
+
+    dialogRef.afterClosed().subscribe(async (confirm) => {
+      if (!confirm) {
+        return;
+      }
+
+      if (!this.currentUserId) {
+        console.error('Not allowed to add a snippet without a user id');
+        return;
+      }
+
+      const newSnippet: SaveSnippetDTO = {
+        content: '',
+        language: '',
+        list_id: listId,
+        title: this.snippetName,
+        user_id: this.currentUserId,
+      };
+
+      await this.snippetsService.addSnippet(newSnippet);
+      this.snippetName = '';
+      this.openSnackbar('Snippet saved');
     });
   }
 

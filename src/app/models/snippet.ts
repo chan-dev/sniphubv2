@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase/firestore';
+
 export interface Snippet {
   id: string;
   title: string;
@@ -10,8 +12,12 @@ export interface Snippet {
 
 export interface EmbeddedSnippetUnderList {
   title: string;
-  created_at: number;
+  created_at: FieldValue;
 }
 
 export type SaveSnippetDTO = Omit<Snippet, 'id' | 'created_at'>;
+export type SaveSnippetWithTimestampDTO = SaveSnippetDTO & {
+  created_at: FieldValue;
+};
+
 export type UpdateSnippetDTO = Partial<SaveSnippetDTO>;

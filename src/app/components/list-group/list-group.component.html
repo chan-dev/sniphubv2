@@ -15,12 +15,15 @@
           Rename
         </button>
         <button mat-menu-item (click)="deleteList(list.id)">Delete</button>
+        <button mat-menu-item (click)="openSnippetModal(list.id)">
+          Add snippet
+        </button>
       </mat-menu>
     </li>
   }
 </ul>
 
-<ng-template #bodyTemplateRef>
+<ng-template #editListBodyTemplateRef>
   <p class="flex flex-col">
     <input
       type="text"
@@ -32,6 +35,30 @@
         '--tw-ring-color': 'transparent'
       }"
       [(ngModel)]="listName"
+      required
+      #name="ngModel"
+    />
+    <!-- Add explicit height to prevent UI layout shifts -->
+    <span class="block h-[20px] peer-invalid:text-red-700">
+      @if (name.invalid && (name.touched || name.dirty)) {
+        <span class="text-sm">Name is required</span>
+      }
+    </span>
+  </p>
+</ng-template>
+
+<ng-template #addSnippetBodyTemplateRef>
+  <p class="flex flex-col">
+    <input
+      type="text"
+      class="peer w-full border p-2 text-sm"
+      [ngClass]="{
+        '!border-red-700': name.invalid && (name.touched || name.dirty)
+      }"
+      [ngStyle]="{
+        '--tw-ring-color': 'transparent'
+      }"
+      [(ngModel)]="snippetName"
       required
       #name="ngModel"
     />

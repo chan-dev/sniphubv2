@@ -22,7 +22,9 @@
         }
 
         <mat-menu #snippetMenu="matMenu" [hasBackdrop]="false">
-          <button mat-menu-item (click)="editSnippet(snippet.key)">Edit</button>
+          <button mat-menu-item (click)="editSnippet(snippet.key)">
+            Rename
+          </button>
           <button mat-menu-item (click)="deleteSnippet(snippet.key)">
             Delete
           </button>
