@@ -5,14 +5,14 @@
   >
     <div class="mb-2 flex justify-between">
       <a routerLink="/">My Snippets</a>
-      <button
-        type="button"
-        class="inline-flex items-center"
-        [matMenuTriggerFor]="rootMenu"
-        isDropdownMenu
-      >
-        <ng-icon name="ionEllipsisHorizontal"></ng-icon>
-      </button>
+        <button
+          type="button"
+          class="inline-flex items-center"
+          [matMenuTriggerFor]="rootMenu"
+          isDropdownMenu
+        >
+          <ng-icon name="ionEllipsisHorizontal"></ng-icon>
+        </button>
     </div>
     <div class="flex items-center">
       <app-list-group
@@ -29,7 +29,7 @@
     @if (activeSnippetId$ | async; as snippetId) {
       <app-snippet [snippetId]="snippetId"></app-snippet>
     } @else {
-      <p>default view</p>
+      <app-default-snippet-view />
     }
   </div>
 </div>

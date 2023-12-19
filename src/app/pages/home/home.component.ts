@@ -34,6 +34,7 @@ import { ListGroupComponent } from '../../components/list-group/list-group.compo
 import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { AuthService } from '../../services/auth.service';
+import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
 
 @Component({
   selector: 'app-home',
@@ -61,6 +62,7 @@ import { AuthService } from '../../services/auth.service';
     ModalComponent,
     ListComponent,
     DropdownMenuDirective,
+    DefaultSnippetViewComponent,
   ],
 })
 export class HomeComponent implements OnInit {
