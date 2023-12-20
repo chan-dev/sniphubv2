@@ -31,6 +31,5 @@ export class ContextMenuDirective {
   closeContextMenu(event: MouseEvent) {
     this.menu.closeMenu();
     event.stopPropagation();
-    console.log('ContextMenuDirective: closeContextMenu');
   }
 }

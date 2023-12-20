@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
@@ -12,6 +12,7 @@ import { UsersService } from '../../services/users.service';
   imports: [CommonModule, RouterLink, NgIconComponent],
   templateUrl: './login.component.html',
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   private authService = inject(AuthService);

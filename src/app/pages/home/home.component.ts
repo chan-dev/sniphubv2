@@ -1,5 +1,8 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
   TemplateRef,
   ViewChild,
@@ -17,6 +20,7 @@ import { map, shareReplay } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { serverTimestamp } from '@angular/fire/firestore';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -64,10 +68,13 @@ import { DefaultSnippetViewComponent } from '../../components/default-snippet-vi
     DropdownMenuDirective,
     DefaultSnippetViewComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  private cdRef = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
   private authService = inject(AuthService);
@@ -89,9 +96,13 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    return this.listsService.getLists(this.currentUserId).subscribe((lists) => {
-      this.lists = lists;
-    });
+    return this.listsService
+      .getLists(this.currentUserId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((lists) => {
+        this.lists = lists;
+        this.cdRef.markForCheck();
+      });
   }
 
   async logout() {
@@ -123,24 +134,19 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      // call save list service to create new list
       const newList: NewListWithTimestampDTO = {
         name: this.listName,
         uid: this.currentUserId,
         created_at: serverTimestamp(),
       };
 
-      this.listsService.createList(newList).subscribe({
-        next: (data) => {
-          console.log('List created', {
-            data: data,
-          });
+      this.listsService
+        .createList(newList)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
           this.listName = '';
-        },
-        error: (err) => {
-          console.error(`Caught error: ${err}`);
-        },
-      });
+          this.cdRef.markForCheck();
+        });
     });
   }
 }

@@ -1,4 +1,12 @@
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -43,6 +51,7 @@ import { AutoFocusDirective } from '../../directives/auto-focus.directive';
     }
   `,
   providers: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SnippetComponent implements OnInit {
   @Input() set snippetId(id: string) {
@@ -53,6 +62,7 @@ export class SnippetComponent implements OnInit {
     this.snippetSubject.next(id);
   }
 
+  private cdRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
   private snippetService = inject(SnippetService);
   private snackbarService = inject(SnackbarService);
@@ -117,13 +127,14 @@ export class SnippetComponent implements OnInit {
         this.editorLanguage = this.snippet.language;
 
         this.setEditorOptions({ language: this.snippet.language });
+
+        // Since we're using changing component state via rxjs
+        // inside a component using OnPush, we need to manually detect changes.
+        this.cdRef.markForCheck();
       });
 
     this.trackUnsavedService.hasUnsaved$
-      .pipe(
-        tap((hasChanged) => console.log(`hasChanged`, hasChanged)),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         this.isEditInProgress = value;
 

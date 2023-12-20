@@ -24,6 +24,5 @@ export class DropdownMenuDirective {
   closeContextMenu(event: MouseEvent) {
     this.menu.closeMenu();
     event.stopPropagation();
-    console.log('DropdownMenuDirective: closeContextMenu');
   }
 }

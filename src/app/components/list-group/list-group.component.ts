@@ -1,5 +1,7 @@
 import {
+  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Input,
   TemplateRef,
   ViewChild,
@@ -10,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
@@ -39,6 +42,7 @@ import { SnippetService } from '../../services/snippets.service';
     ListComponent,
     ContextMenuDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListGroupComponent {
   @Input() lists: List[] = [];
@@ -49,6 +53,7 @@ export class ListGroupComponent {
   @ViewChild('addSnippetBodyTemplateRef')
   addSnippetBodyTemplateRef!: TemplateRef<any>;
 
+  private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
   private authService = inject(AuthService);
   private listsService = inject(ListsService);
@@ -84,11 +89,14 @@ export class ListGroupComponent {
         name: this.listName,
       };
 
-      this.listsService.editList(editListDTO).subscribe((result) => {
-        console.log('edit succesful', result);
-        this.openSnackbar('List updated');
-        this.listName = '';
-      });
+      this.listsService
+        .editList(editListDTO)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((result) => {
+          console.log('edit succesful', result);
+          this.openSnackbar('List updated');
+          this.listName = '';
+        });
     });
   }
 
@@ -109,10 +117,13 @@ export class ListGroupComponent {
         return;
       }
 
-      this.listsService.deleteList(id).subscribe((result) => {
-        console.log('delete succesful', result);
-        this.openSnackbar('List deleted');
-      });
+      this.listsService
+        .deleteList(id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((result) => {
+          console.log('delete succesful', result);
+          this.openSnackbar('List deleted');
+        });
     });
   }
 

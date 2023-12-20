@@ -1,4 +1,10 @@
-import { Component, Input, ViewChild, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -27,6 +33,7 @@ import { SnackbarService } from '../../services/snackbar.service';
       margin-left: -3px;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListComponent {
   @Input() list!: List;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
@@ -7,5 +7,6 @@ import { NgIconComponent } from '@ng-icons/core';
   imports: [NgIconComponent],
   templateUrl: './default-snippet-view.component.html',
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DefaultSnippetViewComponent {}
