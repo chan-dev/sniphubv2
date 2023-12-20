@@ -25,8 +25,17 @@
         [activeSnippetId]="(activeSnippetId$ | async) || ''"
       ></app-list-group>
     </div>
-    <div class="mt-auto py-2">
-      <button type="button" (click)="logout()">Logout</button>
+    <div class="space-between mt-auto flex items-center py-2">
+      <img
+        [src]="
+          currentUser?.photoUrl
+            ? currentUser?.photoUrl
+            : 'https://ui-avatars.com/api/?name=' + currentUser?.username
+        "
+        class="h-7 w-7 rounded-full"
+        alt="User's avatar"
+      />
+      <button type="button" class="ml-auto" (click)="logout()">Logout</button>
     </div>
   </div>
 
