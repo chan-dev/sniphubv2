@@ -22,12 +22,18 @@ export class LoginComponent {
 
   async login() {
     try {
-      const userCredential = await this.authService.login();
-      await this.usersService.createNewUser({
-        username: userCredential.user.displayName || '',
-        email: userCredential.user.email || '',
-        uid: userCredential.user.uid,
-      });
+      await this.authService.login();
+
+      this.router.navigate(['/home']);
+    } catch (error) {
+      console.log('error', { error });
+    }
+  }
+
+  async register() {
+    try {
+      await this.authService.register();
+
       this.router.navigate(['/home']);
     } catch (error) {
       console.log('error', { error });

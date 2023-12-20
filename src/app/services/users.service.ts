@@ -1,9 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
-  addDoc,
   collection,
+  doc,
+  documentId,
+  getDocs,
+  query,
   serverTimestamp,
+  setDoc,
+  where,
+  writeBatch,
 } from '@angular/fire/firestore';
 import { NewUserDTO } from '../models/user';
 import { asyncScheduler, catchError, scheduled, throwError } from 'rxjs';
@@ -12,20 +18,15 @@ import { asyncScheduler, catchError, scheduled, throwError } from 'rxjs';
 export class UsersService {
   private db = inject(Firestore);
 
-  createNewUser(newUser: NewUserDTO) {
-    const collectionRef = collection(this.db, 'users');
-
-    addDoc(collectionRef, {
-      name: newUser.username,
-      email: newUser.email,
-      created_at: serverTimestamp(),
-    });
+  createNewUser(userId: string, newUser: NewUserDTO) {
+    const docRef = doc(this.db, 'users', userId);
 
     return scheduled(
-      addDoc(collectionRef, {
+      setDoc(docRef, {
         name: newUser.username,
         email: newUser.email,
         created_at: serverTimestamp(),
+        photoUrl: newUser.photoUrl,
       }),
       asyncScheduler,
     ).pipe(
