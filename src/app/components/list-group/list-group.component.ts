@@ -62,20 +62,18 @@ export class ListGroupComponent {
   private snackbarService = inject(SnackbarService);
 
   listName = '';
-  snippetName = '';
+  snippetTitle = '';
   currentUser = this.authService.currentUser;
   currentUserId = this.currentUser?.uid;
 
   editList(list: EditListDTO) {
-    console.log('editList', list);
-
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: true,
     });
 
     this.listName = list.name;
 
-    dialogRef.componentInstance.title = 'Edit list';
+    dialogRef.componentInstance.title = 'Rename list';
     dialogRef.componentInstance.bodyTemplateRef = this.editListBodyTemplateRef;
     dialogRef.componentInstance.confirmButtonLabel = 'Save';
 
@@ -101,8 +99,6 @@ export class ListGroupComponent {
   }
 
   deleteList(id: string) {
-    console.log('deleteList', id);
-
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: false,
     });
@@ -151,12 +147,12 @@ export class ListGroupComponent {
         content: '',
         language: '',
         list_id: listId,
-        title: this.snippetName,
+        title: this.snippetTitle,
         user_id: this.currentUserId,
       };
 
       await this.snippetsService.addSnippet(newSnippet);
-      this.snippetName = '';
+      this.snippetTitle = '';
       this.openSnackbar('Snippet saved');
     });
   }

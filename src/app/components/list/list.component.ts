@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
+  TemplateRef,
   ViewChild,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
@@ -16,12 +18,14 @@ import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { SnippetService } from '../../services/snippets.service';
 import { SnackbarService } from '../../services/snackbar.service';
+import { UpdateSnippetDTO } from '../../models/snippet';
 
 @Component({
   selector: 'app-list',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatMenuModule,
     NgIconComponent,
     RouterLink,
@@ -40,6 +44,8 @@ export class ListComponent {
   @Input() activeSnippetId?: string;
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
+  @ViewChild('editSnippetBodyTemplateRef')
+  editListBodyTemplateRef!: TemplateRef<any>;
 
   private router = inject(Router);
   private dialog = inject(MatDialog);
@@ -47,6 +53,7 @@ export class ListComponent {
   private snippetsService = inject(SnippetService);
 
   isExpanded = false;
+  snippetTitle = '';
 
   editList(id: string) {
     console.log('editList', id);
@@ -55,12 +62,32 @@ export class ListComponent {
     console.log('deleteList', id);
   }
 
-  editSnippet(id: string) {
-    console.log('editSnippet', id);
+  editSnippet(id: string, title: string, listId: string) {
+    this.snippetTitle = title;
+
+    const dialogRef = this.dialog.open(ModalComponent, {
+      disableClose: false,
+    });
+
+    dialogRef.componentInstance.title = 'Rename snippet';
+    dialogRef.componentInstance.bodyTemplateRef = this.editListBodyTemplateRef;
+    dialogRef.componentInstance.confirmButtonLabel = 'Save';
+
+    dialogRef.afterClosed().subscribe(async (confirm) => {
+      if (!confirm) {
+        return;
+      }
+
+      const updatedSnippet: UpdateSnippetDTO = {
+        title: this.snippetTitle,
+      };
+
+      await this.snippetsService.updateSnippet(id, listId, updatedSnippet);
+      this.snippetTitle = '';
+      this.openSnackbar('Snippet updated');
+    });
   }
   deleteSnippet(id: string, listId: string) {
-    console.log('deleteList', id);
-
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: false,
     });
