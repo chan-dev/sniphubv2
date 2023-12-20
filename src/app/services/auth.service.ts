@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Auth,
+  User as FirebaseUser,
   GoogleAuthProvider,
-  User,
   getAdditionalUserInfo,
   onAuthStateChanged,
   signInWithPopup,
@@ -11,26 +11,27 @@ import {
 import { Subject, shareReplay, tap } from 'rxjs';
 
 import { UsersService } from './users.service';
-import { NewUserDTO } from '../models/user';
+import { NewUserDTO, User } from '../models/user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private auth = inject(Auth);
-  private authSubject = new Subject<User | null>();
+  private authSubject = new Subject<FirebaseUser | null>();
 
   private usersService = inject(UsersService);
 
   currentUser$ = this.authSubject.asObservable().pipe(
-    tap((user) => (this.currentUser = user)),
+    tap((user) => {
+      this.extractUserPublicData(user);
+    }),
     shareReplay(1),
   );
 
   currentUser: User | null = null;
 
   constructor() {
-    console.log('AuthService initialized');
     onAuthStateChanged(this.auth, (user) => {
       console.log('onAuthStateChanged', user);
       this.authSubject.next(user);
@@ -81,5 +82,20 @@ export class AuthService {
       uid: newUser.uid,
       photoUrl: newUser.photoUrl,
     });
+  }
+
+  /**
+   * This effectively hides any redundant information about the user
+   * and hides any sensitive information such as access tokens.
+   * @param user Firebase user
+   */
+  private extractUserPublicData(user: FirebaseUser | null) {
+    this.currentUser = {
+      username: user?.displayName || '',
+      email: user?.email || '',
+      uid: user?.uid || '',
+      created_at: user?.metadata.creationTime || 0,
+      photoUrl: user?.photoURL || '',
+    } as User;
   }
 }
