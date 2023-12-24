@@ -16,7 +16,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { map, shareReplay } from 'rxjs';
+import { map, of, shareReplay, switchMap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { serverTimestamp } from '@angular/fire/firestore';
@@ -39,6 +39,8 @@ import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive'
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { AuthService } from '../../services/auth.service';
 import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
+import { Snippet } from '../../models/snippet';
+import { SnippetService } from '../../services/snippets.service';
 
 @Component({
   selector: 'app-home',
@@ -78,6 +80,14 @@ export class HomeComponent implements OnInit {
   private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
   private authService = inject(AuthService);
+  private snippetsService = inject(SnippetService);
+
+  private readonly defaultSnippet = {
+    id: '',
+    title: 'Untitled',
+    content: '',
+    language: '',
+  } as Snippet;
 
   @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
 
@@ -89,6 +99,16 @@ export class HomeComponent implements OnInit {
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
     shareReplay(1),
+  );
+
+  activeSnippet$ = this.activeSnippetId$.pipe(
+    switchMap((id) => {
+      console.log('snippet id', id);
+      if (!id) {
+        return of(null);
+      }
+      return this.snippetsService.getSnippet(id);
+    }),
   );
 
   ngOnInit() {

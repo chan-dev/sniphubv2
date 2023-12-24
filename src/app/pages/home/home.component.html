@@ -40,8 +40,8 @@
   </div>
 
   <div id="content" class="col-span-3">
-    @if (activeSnippetId$ | async; as snippetId) {
-      <app-snippet [snippetId]="snippetId"></app-snippet>
+    @if (activeSnippet$ | async; as snippet) {
+      <app-snippet [snippet]="snippet"></app-snippet>
     } @else {
       <app-default-snippet-view />
     }

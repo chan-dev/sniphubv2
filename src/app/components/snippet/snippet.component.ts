@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -54,12 +54,8 @@ import { AutoFocusDirective } from '../../directives/auto-focus.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SnippetComponent implements OnInit {
-  @Input() set snippetId(id: string) {
-    if (!id) {
-      return;
-    }
-
-    this.snippetSubject.next(id);
+  @Input() set snippet(value: Snippet | null) {
+    this.snippetSubject.next(value);
   }
 
   private cdRef = inject(ChangeDetectorRef);
@@ -67,7 +63,7 @@ export class SnippetComponent implements OnInit {
   private snippetService = inject(SnippetService);
   private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
-  private snippetSubject = new BehaviorSubject<string | null>(null);
+  private snippetSubject = new BehaviorSubject<Snippet | null>(null);
 
   private readonly defaultSnippet = {
     id: '',
@@ -76,11 +72,11 @@ export class SnippetComponent implements OnInit {
     language: '',
   } as Snippet;
 
-  snippet = this.defaultSnippet;
+  activeSnippet = this.defaultSnippet;
 
-  editorContent = this.snippet.content;
-  editorTitle = this.snippet.title;
-  editorLanguage = this.snippet.language;
+  editorContent = this.activeSnippet.content;
+  editorTitle = this.activeSnippet.title;
+  editorLanguage = this.activeSnippet.language;
 
   savingInProgress = false;
 
@@ -104,14 +100,9 @@ export class SnippetComponent implements OnInit {
     console.log('snippet component ngOnInit');
     this.snippetSubject
       .pipe(
+        // Everytime we switch to a different state
+        // reset local state.
         tap(() => this.resetToDefaults()),
-        switchMap((id) => {
-          console.log('snippet id', id);
-          if (!id) {
-            return of(this.defaultSnippet);
-          }
-          return this.snippetService.getSnippet(id);
-        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((snippet) => {
@@ -121,12 +112,12 @@ export class SnippetComponent implements OnInit {
           return;
         }
 
-        this.snippet = snippet;
-        this.editorContent = this.snippet.content;
-        this.editorTitle = this.snippet.title;
-        this.editorLanguage = this.snippet.language;
+        this.activeSnippet = snippet;
+        this.editorContent = this.activeSnippet.content;
+        this.editorTitle = this.activeSnippet.title;
+        this.editorLanguage = this.activeSnippet.language;
 
-        this.setEditorOptions({ language: this.snippet.language });
+        this.setEditorOptions({ language: this.activeSnippet.language });
 
         // Since we're using changing component state via rxjs
         // inside a component using OnPush, we need to manually detect changes.
@@ -171,7 +162,7 @@ export class SnippetComponent implements OnInit {
   }
 
   updateEditorContent(content: string) {
-    if (content !== this.snippet.content) {
+    if (content !== this.activeSnippet.content) {
       this.trackUnsavedService.trackChange(true);
     }
   }
@@ -195,13 +186,13 @@ export class SnippetComponent implements OnInit {
           language: this.editorLanguage,
         };
 
-        if (this.editorTitle !== this.snippet.title) {
+        if (this.editorTitle !== this.activeSnippet.title) {
           data.title = this.editorTitle;
         }
 
         await this.snippetService.updateSnippet(
           snippetId,
-          this.snippet.list_id,
+          this.activeSnippet.list_id,
           data,
         );
 
@@ -235,9 +226,9 @@ export class SnippetComponent implements OnInit {
 
   private resetToDefaults() {
     this.isTitleEditable = false;
-    this.editorContent = this.snippet.content;
-    this.editorTitle = this.snippet.title;
-    this.editorLanguage = this.snippet.language;
+    this.editorContent = this.activeSnippet?.content;
+    this.editorTitle = this.activeSnippet?.title;
+    this.editorLanguage = this.activeSnippet?.language;
     this.hasUnsavedChanges = false;
   }
 
