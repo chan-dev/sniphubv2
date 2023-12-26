@@ -15,7 +15,7 @@ import {
 import { defer, map } from 'rxjs';
 
 import { EditListDTO, List, NewListWithTimestampDTO } from '../models/list';
-import { promisify } from '../utils/promise';
+import { wrapPromiseWithErrorHandler } from '../utils/promise';
 
 @Injectable({ providedIn: 'root' })
 export class ListsService {
@@ -51,7 +51,10 @@ export class ListsService {
     const collectionRef = collection(this.db, `lists`);
 
     return defer(() => {
-      let newListDocPromise = promisify(addDoc)(collectionRef, newList);
+      let newListDocPromise = wrapPromiseWithErrorHandler(addDoc)(
+        collectionRef,
+        newList,
+      );
       return newListDocPromise;
     });
   }
@@ -60,9 +63,12 @@ export class ListsService {
     const listRef = doc(this.db, `lists/${list.id}`);
 
     return defer(() => {
-      const updateListDocPromise = promisify(updateDoc)(listRef, {
-        name: list.name,
-      });
+      const updateListDocPromise = wrapPromiseWithErrorHandler(updateDoc)(
+        listRef,
+        {
+          name: list.name,
+        },
+      );
       return updateListDocPromise;
     });
   }
@@ -71,7 +77,8 @@ export class ListsService {
     const listRef = doc(this.db, `lists/${id}`);
 
     return defer(() => {
-      const deleteListDocPromise = promisify(deleteDoc)(listRef);
+      const deleteListDocPromise =
+        wrapPromiseWithErrorHandler(deleteDoc)(listRef);
       return deleteListDocPromise;
     });
   }
