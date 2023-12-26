@@ -14,6 +14,7 @@ import { BehaviorSubject, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
@@ -21,6 +22,7 @@ import { SnackbarService } from '../../services/snackbar.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
 import { AutoFocusDirective } from '../../directives/auto-focus.directive';
+import { ModalComponent } from '../../ui/libs/modal/modal.component';
 
 @Component({
   selector: 'app-snippet',
@@ -60,6 +62,7 @@ export class SnippetComponent implements OnInit {
 
   private cdRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
   private snippetService = inject(SnippetService);
   private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
@@ -209,15 +212,24 @@ export class SnippetComponent implements OnInit {
   }
 
   cancelUpdate() {
-    const question =
-      'You have unsaved changes. Are you sure you want to discard them?';
+    const dialogRef = this.dialog.open(ModalComponent, {
+      disableClose: false,
+    });
 
-    // TODO: replace with modal
-    // Modal should be reused on the `unsavedChangesGuard` route guard
-    if (window.confirm(question)) {
+    dialogRef.componentInstance.title = 'Cancel Update';
+    dialogRef.componentInstance.body =
+      'You have unsaved changes. Are you sure you want to discard them?';
+    dialogRef.componentInstance.confirmButtonLabel = 'Ok';
+    dialogRef.componentInstance.cancelButtonLabel = 'Close';
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      if (!confirm) {
+        return;
+      }
       this.resetToDefaults();
       this.trackUnsavedService.reset();
-    }
+      this.cdRef.markForCheck();
+    });
   }
 
   openSnackbar(message: string) {
