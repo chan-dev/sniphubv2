@@ -134,7 +134,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  openListModal() {
+  createList() {
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: true,
     });

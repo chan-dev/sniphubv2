@@ -123,7 +123,7 @@ export class ListGroupComponent {
     });
   }
 
-  openSnippetModal(listId: string) {
+  adSnippet(listId: string) {
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: false,
     });
