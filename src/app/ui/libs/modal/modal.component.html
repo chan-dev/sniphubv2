@@ -24,20 +24,22 @@
   @if (ctaTemplateRef) {
     <ng-container> *ngTemplateOutlet="ctaTemplateRef" ></ng-container>
   } @else {
-    <button
-      class="rounded border px-1 py-0.5"
-      type="button"
-      (click)="dialogRef.close()"
-    >
-      {{ cancelButtonLabel || "Cancel" }}
-    </button>
-    <button
-      class="rounded border bg-blue-700 px-1 py-0.5 text-white disabled:opacity-50"
-      mat-button
-      cdkFocusInitial
-      [mat-dialog-close]="true"
-    >
-      {{ confirmButtonLabel || "Ok" }}
-    </button>
+    <div class="flex w-[200px] gap-1 [&_button]:flex-1">
+      <button
+        class="rounded border px-1 py-0.5"
+        type="button"
+        (click)="dialogRef.close()"
+      >
+        {{ cancelButtonLabel || "Cancel" }}
+      </button>
+      <button
+        class="rounded border bg-blue-700 px-1 py-0.5 text-white disabled:opacity-50"
+        mat-button
+        cdkFocusInitial
+        [mat-dialog-close]="true"
+      >
+        {{ confirmButtonLabel || "Ok" }}
+      </button>
+    </div>
   }
 </div>
