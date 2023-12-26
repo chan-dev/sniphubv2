@@ -25,6 +25,7 @@
     "@ng-icons/ionicons": "^26.0.0",
     "@ng-icons/simple-icons": "^26.3.0",
     "@ng-icons/tabler-icons": "^26.2.1",
+    "@ngrx/component-store": "^17.0.1",
     "firebase": "^10.6.0",
     "monaco-editor": "^0.44.0",
     "ngx-monaco-editor-v2": "^17.0.1",

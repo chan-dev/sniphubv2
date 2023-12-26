@@ -12,7 +12,7 @@ export const isAuthenticatedGuard: CanMatchFn = (route, segments) => {
 
   return authService.currentUser$.pipe(
     tap((currentUser) => {
-      console.log('currentUser', { currentUser });
+      console.log('[isAuthenticatedGuard]: currentUser', { currentUser });
     }),
     map((currentUser) => {
       if (!currentUser) {

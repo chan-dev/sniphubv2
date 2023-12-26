@@ -12,7 +12,7 @@ export const isGuestGuard: CanMatchFn = (route, segments) => {
 
   return authService.currentUser$.pipe(
     tap((currentUser) => {
-      console.log('currentUser', { currentUser });
+      console.log('[isGuestGuard]: currentUser', { currentUser });
     }),
     map((currentUser) => {
       if (currentUser) {

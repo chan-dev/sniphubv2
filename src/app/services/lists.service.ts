@@ -62,7 +62,7 @@ export class ListsService {
   editList(list: EditListDTO) {
     const listRef = doc(this.db, `lists/${list.id}`);
 
-    return defer(() => {
+    return defer(async () => {
       const updateListDocPromise = wrapPromiseWithErrorHandler(updateDoc)(
         listRef,
         {

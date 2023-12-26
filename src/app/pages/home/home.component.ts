@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
   OnInit,
   TemplateRef,
   ViewChild,
@@ -16,11 +15,11 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { map, of, shareReplay, switchMap } from 'rxjs';
+import { map, shareReplay } from 'rxjs';
+import { provideComponentStore } from '@ngrx/component-store';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { serverTimestamp } from '@angular/fire/firestore';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -31,7 +30,6 @@ import {
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
 import { List, NewListWithTimestampDTO } from '../../models/list';
-import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
@@ -39,14 +37,14 @@ import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive'
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { AuthService } from '../../services/auth.service';
 import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
-import { Snippet } from '../../models/snippet';
-import { SnippetService } from '../../services/snippets.service';
+import { SnippetsStore } from '../../services/snippets.store';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   templateUrl: './home.component.html',
   styles: [],
+  providers: [provideComponentStore(SnippetsStore)],
   viewProviders: [
     provideIcons({
       ionAdd,
@@ -75,19 +73,13 @@ import { SnippetService } from '../../services/snippets.service';
 export class HomeComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
   private cdRef = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
-  private listsService = inject(ListsService);
   private authService = inject(AuthService);
-  private snippetsService = inject(SnippetService);
 
-  private readonly defaultSnippet = {
-    id: '',
-    title: 'Untitled',
-    content: '',
-    language: '',
-  } as Snippet;
+  private snippetsStore = inject(SnippetsStore);
+
+  vm$ = this.snippetsStore.vm$;
 
   @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
 
@@ -101,28 +93,9 @@ export class HomeComponent implements OnInit {
     shareReplay(1),
   );
 
-  activeSnippet$ = this.activeSnippetId$.pipe(
-    switchMap((id) => {
-      console.log('snippet id', id);
-      if (!id) {
-        return of(null);
-      }
-      return this.snippetsService.getSnippet(id);
-    }),
-  );
-
   ngOnInit() {
-    if (!this.currentUserId) {
-      return;
-    }
-
-    return this.listsService
-      .getLists(this.currentUserId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((lists) => {
-        this.lists = lists;
-        this.cdRef.markForCheck();
-      });
+    this.snippetsStore.getLists(this.currentUserId ?? null);
+    this.snippetsStore.getActiveSnippet(this.activeSnippetId$);
   }
 
   async logout() {
@@ -160,13 +133,13 @@ export class HomeComponent implements OnInit {
         created_at: serverTimestamp(),
       };
 
-      this.listsService
-        .createList(newList)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => {
+      this.snippetsStore.saveList({
+        newList,
+        cb: () => {
           this.listName = '';
           this.cdRef.markForCheck();
-        });
+        },
+      });
     });
   }
 }

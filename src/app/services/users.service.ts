@@ -1,15 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
-  collection,
   doc,
-  documentId,
-  getDocs,
-  query,
   serverTimestamp,
   setDoc,
-  where,
-  writeBatch,
 } from '@angular/fire/firestore';
 import { NewUserDTO } from '../models/user';
 import { asyncScheduler, catchError, scheduled, throwError } from 'rxjs';

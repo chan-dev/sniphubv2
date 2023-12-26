@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   Input,
   TemplateRef,
   ViewChild,
@@ -12,17 +11,15 @@ import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
-import { ListsService } from '../../services/lists.service';
 import { SnackbarService } from '../../services/snackbar.service';
 import { SaveSnippetDTO } from '../../models/snippet';
 import { AuthService } from '../../services/auth.service';
-import { SnippetService } from '../../services/snippets.service';
+import { SnippetsStore } from '../../services/snippets.store';
 
 @Component({
   selector: 'app-list-group',
@@ -53,11 +50,9 @@ export class ListGroupComponent {
   @ViewChild('addSnippetBodyTemplateRef')
   addSnippetBodyTemplateRef!: TemplateRef<any>;
 
-  private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private snippetsStore = inject(SnippetsStore);
   private authService = inject(AuthService);
-  private listsService = inject(ListsService);
-  private snippetsService = inject(SnippetService);
 
   private snackbarService = inject(SnackbarService);
 
@@ -87,14 +82,13 @@ export class ListGroupComponent {
         name: this.listName,
       };
 
-      this.listsService
-        .editList(editListDTO)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((result) => {
-          console.log('edit succesful', result);
+      this.snippetsStore.editList({
+        list: editListDTO,
+        cb: () => {
           this.openSnackbar('List updated');
           this.listName = '';
-        });
+        },
+      });
     });
   }
 
@@ -113,17 +107,16 @@ export class ListGroupComponent {
         return;
       }
 
-      this.listsService
-        .deleteList(id)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((result) => {
-          console.log('delete succesful', result);
+      this.snippetsStore.deleteList({
+        id,
+        cb: () => {
           this.openSnackbar('List deleted');
-        });
+        },
+      });
     });
   }
 
-  adSnippet(listId: string) {
+  addSnippet(listId: string) {
     const dialogRef = this.dialog.open(ModalComponent, {
       disableClose: false,
     });
@@ -151,9 +144,13 @@ export class ListGroupComponent {
         user_id: this.currentUserId,
       };
 
-      await this.snippetsService.addSnippet(newSnippet);
-      this.snippetTitle = '';
-      this.openSnackbar('Snippet saved');
+      this.snippetsStore.addSnippet({
+        snippet: newSnippet,
+        cb: () => {
+          this.snippetTitle = '';
+          this.openSnackbar('Snippet added');
+        },
+      });
     });
   }
 

@@ -17,12 +17,12 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
-import { SnippetService } from '../../services/snippets.service';
 import { SnackbarService } from '../../services/snackbar.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
 import { AutoFocusDirective } from '../../directives/auto-focus.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
+import { SnippetsStore } from '../../services/snippets.store';
 
 @Component({
   selector: 'app-snippet',
@@ -63,7 +63,7 @@ export class SnippetComponent implements OnInit {
   private cdRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
-  private snippetService = inject(SnippetService);
+  private snippetsStore = inject(SnippetsStore);
   private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
   private snippetSubject = new BehaviorSubject<Snippet | null>(null);
@@ -193,17 +193,18 @@ export class SnippetComponent implements OnInit {
           data.title = this.editorTitle;
         }
 
-        await this.snippetService.updateSnippet(
-          snippetId,
-          this.activeSnippet.list_id,
-          data,
-        );
-
-        this.savingInProgress = false;
-        // this.shouldEdit = false;
-        this.trackUnsavedService.trackChange(false);
-        // this.updateEditorReadonly(true);
-        this.openSnackbar('Snippet saved');
+        this.snippetsStore.updateSnippet({
+          id: snippetId,
+          list_id: this.activeSnippet.list_id,
+          snippet: data,
+          cb: () => {
+            this.savingInProgress = false;
+            // this.shouldEdit = false;
+            this.trackUnsavedService.trackChange(false);
+            // this.updateEditorReadonly(true);
+            this.openSnackbar('Snippet saved');
+          },
+        });
       } catch (error) {
         console.error(error);
         this.openSnackbar('Failed to save snippet');
