@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   signOut,
 } from '@angular/fire/auth';
-import { Subject, shareReplay, tap } from 'rxjs';
+import { Subject, shareReplay, take, tap } from 'rxjs';
 
 import { UsersService } from './users.service';
 import { NewUserDTO, User } from '../models/user';
@@ -67,7 +67,7 @@ export class AuthService {
         photoUrl: userCredential.user.photoURL || '',
       };
 
-      await this.createNewUser(newUser.uid, newUser);
+      this.createNewUser(newUser.uid, newUser).pipe(take(1)).subscribe();
     }
   }
 
