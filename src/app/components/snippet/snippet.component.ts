@@ -210,7 +210,7 @@ export class SnippetComponent implements OnInit {
 
   cancelUpdate() {
     const question =
-      'You have unsaved changes. Are you sure you want to leave?';
+      'You have unsaved changes. Are you sure you want to discard them?';
 
     // TODO: replace with modal
     // Modal should be reused on the `unsavedChangesGuard` route guard
