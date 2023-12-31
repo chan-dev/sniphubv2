@@ -14,7 +14,6 @@ import { BehaviorSubject, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
@@ -22,7 +21,7 @@ import { SnackbarService } from '../../services/snackbar.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
 import { AutoFocusDirective } from '../../directives/auto-focus.directive';
-import { ModalComponent } from '../../ui/libs/modal/modal.component';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-snippet',
@@ -62,10 +61,11 @@ export class SnippetComponent implements OnInit {
 
   private cdRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
-  private dialog = inject(MatDialog);
   private snippetService = inject(SnippetService);
   private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
+  private modalService = inject(ModalService);
+
   private snippetSubject = new BehaviorSubject<Snippet | null>(null);
 
   private readonly defaultSnippet = {
@@ -212,17 +212,20 @@ export class SnippetComponent implements OnInit {
   }
 
   cancelUpdate() {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Cancel Update',
+        body: 'You have unsaved changes. Are you sure you want to discard them?',
+        confirmButtonLabel: 'Ok',
+        cancelButtonLabel: 'Close',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Cancel Update';
-    dialogRef.componentInstance.body =
-      'You have unsaved changes. Are you sure you want to discard them?';
-    dialogRef.componentInstance.confirmButtonLabel = 'Ok';
-    dialogRef.componentInstance.cancelButtonLabel = 'Close';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
+    modalAfterClosed$.subscribe((confirm) => {
       if (!confirm) {
         return;
       }

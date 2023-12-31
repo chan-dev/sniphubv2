@@ -18,7 +18,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { map, of, shareReplay, switchMap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog } from '@angular/material/dialog';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -41,6 +40,7 @@ import { AuthService } from '../../services/auth.service';
 import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
 import { Snippet } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-home',
@@ -77,10 +77,10 @@ export class HomeComponent implements OnInit {
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private cdRef = inject(ChangeDetectorRef);
-  private dialog = inject(MatDialog);
   private listsService = inject(ListsService);
   private authService = inject(AuthService);
   private snippetsService = inject(SnippetService);
+  private modalService = inject(ModalService);
 
   private readonly defaultSnippet = {
     id: '',
@@ -89,10 +89,12 @@ export class HomeComponent implements OnInit {
     language: '',
   } as Snippet;
 
-  @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
+  @ViewChild('createListBodyTemplateRef')
+  createListBodyTemplateRef!: TemplateRef<any>;
 
   lists: List[] = [];
   listName = '';
+  searchText = '';
   currentUser = this.authService.currentUser;
   currentUserId = this.currentUser?.uid;
 
@@ -135,17 +137,22 @@ export class HomeComponent implements OnInit {
   }
 
   createList() {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: true,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Create new list',
+        bodyTemplateRef: this.createListBodyTemplateRef,
+        confirmButtonLabel: 'Create',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Create new list';
-    dialogRef.componentInstance.bodyTemplateRef = this.bodyTemplateRef;
-    dialogRef.componentInstance.confirmButtonLabel = 'Create';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
+    modalAfterClosed$.subscribe((confirm) => {
       console.log('The dialog was closed', { confirm });
       if (!confirm) {
+        this.listName = '';
         return;
       }
 
@@ -167,6 +174,25 @@ export class HomeComponent implements OnInit {
           this.listName = '';
           this.cdRef.markForCheck();
         });
+    });
+  }
+
+  searchSnippets() {
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Search snippets',
+        confirmButtonLabel: 'Search',
+      },
+    });
+
+    modalAfterClosed$.subscribe((confirm) => {
+      if (!confirm) {
+        return;
+      }
     });
   }
 }
