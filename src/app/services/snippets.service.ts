@@ -1,12 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import {
   collection,
+  collectionData,
   deleteField,
   doc,
   docData,
   Firestore,
+  query,
   serverTimestamp,
+  where,
   writeBatch,
 } from '@angular/fire/firestore';
 
@@ -90,5 +93,31 @@ export class SnippetService {
     batch.update(listDocRef, `snippets.${id}`, deleteField());
 
     return batch.commit();
+  }
+
+  searchSnippets(searchPattern: string) {
+    /**
+     * As a tentative solution, we simply support prefix search on "title" property.
+     * Firestore does not natively support full-text or wildcard search.
+     *
+     * However, ideally, we should use a full-text search index to do that using
+     * tools such as Algolia or Elastic Search.
+     * The caveat is that the account has to be on Blaze plan.
+     */
+    const snippetsCollectionRef = collection(this.db, 'snippets');
+    const queryRef = query(
+      snippetsCollectionRef,
+      where('title', '>=', searchPattern),
+      where('title', '<', `${searchPattern}\uf8ff`),
+    );
+
+    return collectionData(queryRef, {
+      idField: 'id',
+    }).pipe(
+      tap((snippets) => console.log('searchSnippets', snippets)),
+      map((snippets) => {
+        return snippets as Snippet[];
+      }),
+    );
   }
 }

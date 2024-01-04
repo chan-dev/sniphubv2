@@ -1,9 +1,13 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  NgZone,
+  OnDestroy,
   OnInit,
+  Renderer2,
   TemplateRef,
   ViewChild,
   inject,
@@ -16,7 +20,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { map, of, shareReplay, switchMap } from 'rxjs';
+import { Observable, map, of, shareReplay, switchMap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -72,15 +76,19 @@ import { ModalService } from '../../services/modal.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private cdRef = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+  private renderer = inject(Renderer2);
   private listsService = inject(ListsService);
   private authService = inject(AuthService);
   private snippetsService = inject(SnippetService);
   private modalService = inject(ModalService);
+
+  private removeSearchEventListener?: Function;
 
   private readonly defaultSnippet = {
     id: '',
@@ -92,11 +100,16 @@ export class HomeComponent implements OnInit {
   @ViewChild('createListBodyTemplateRef')
   createListBodyTemplateRef!: TemplateRef<any>;
 
+  @ViewChild('searchBodyTemplateRef')
+  searchBodyTemplateRef!: TemplateRef<any>;
+
   lists: List[] = [];
   listName = '';
   searchText = '';
   currentUser = this.authService.currentUser;
   currentUserId = this.currentUser?.uid;
+
+  matchingSnippets$!: Observable<Snippet[]>;
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -125,6 +138,33 @@ export class HomeComponent implements OnInit {
         this.lists = lists;
         this.cdRef.markForCheck();
       });
+  }
+
+  ngAfterViewInit(): void {
+    // Use this approach instead of hostlistener to prevent
+    // unnecessary change detection lifecycles
+    this.ngZone.runOutsideAngular(() => {
+      this.removeSearchEventListener = this.renderer.listen(
+        document.body,
+        'keydown',
+        (event) => {
+          if (event.ctrlKey && event.key === 'k') {
+            console.log('open search modal');
+            event.preventDefault();
+
+            this.ngZone.run(() => {
+              this.openSearchModal();
+            });
+          }
+        },
+      );
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.removeSearchEventListener) {
+      this.removeSearchEventListener();
+    }
   }
 
   async logout() {
@@ -177,7 +217,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  searchSnippets() {
+  openSearchModal() {
     const modalAfterClosed$ = this.modalService.openModal({
       dialogOptions: {
         width: '400px',
@@ -185,14 +225,28 @@ export class HomeComponent implements OnInit {
       },
       componentProps: {
         title: 'Search snippets',
+        bodyTemplateRef: this.searchBodyTemplateRef,
         confirmButtonLabel: 'Search',
       },
     });
 
-    modalAfterClosed$.subscribe((confirm) => {
-      if (!confirm) {
-        return;
-      }
+    modalAfterClosed$.subscribe((_confirm) => {
+      this.searchText = '';
     });
+  }
+
+  searchSnippets(searchPattern: string) {
+    console.log('searchPattern', searchPattern);
+
+    this.matchingSnippets$ = this.snippetsService.searchSnippets(searchPattern);
+  }
+
+  navigateToSnippet(snippetId: string) {
+    this.router.navigate([], {
+      queryParams: {
+        snippetId,
+      },
+    });
+    this.modalService.closeDialog();
   }
 }
