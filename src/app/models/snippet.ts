@@ -6,7 +6,7 @@ export interface Snippet {
   content: string;
   language: string;
   created_at: number;
-  user_id: string;
+  uid: string;
   list_id: string;
 }
 

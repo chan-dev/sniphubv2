@@ -157,7 +157,7 @@ export class ListGroupComponent {
         language: '',
         list_id: listId,
         title: this.snippetTitle,
-        user_id: this.currentUserId,
+        uid: this.currentUserId,
       };
 
       await this.snippetsService.addSnippet(newSnippet);
