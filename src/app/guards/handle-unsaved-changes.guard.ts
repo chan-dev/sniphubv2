@@ -13,7 +13,6 @@ export const unsavedChangesGuard: CanDeactivateFn<unknown> = (
 ) => {
   const trackUnsavedService = inject(TrackUnsavedService);
   const destroyRef = inject(DestroyRef);
-  console.log('unsavedChangesGuard called');
 
   destroyRef.onDestroy(() => {
     console.log('route guard destroyed');

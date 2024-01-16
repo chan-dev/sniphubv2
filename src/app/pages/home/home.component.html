@@ -28,9 +28,8 @@
     <div class="space-between mt-auto flex items-center py-2">
       <img
         [src]="
-          currentUser?.photoUrl
-            ? currentUser?.photoUrl
-            : 'https://ui-avatars.com/api/?name=' + currentUser?.username
+          'https://ui-avatars.com/api/?name=' +
+          (currentUser?.email ?? currentUser?.id)
         "
         class="h-7 w-7 rounded-full"
         alt="User's avatar"
@@ -41,7 +40,7 @@
 
   <div id="content" class="col-span-3">
     @if (activeSnippet$ | async; as snippet) {
-      <app-snippet [snippet]="snippet"></app-snippet>
+      <app-snippet [snippet]="snippet.data"></app-snippet>
     } @else {
       <app-default-snippet-view />
     }

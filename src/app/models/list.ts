@@ -1,21 +1,17 @@
-import { FieldValue } from 'firebase/firestore';
+type EmbeddedSnippet = {
+  id: string;
+  title: string;
+  created_at: number;
+};
 
 export interface List {
   id: string;
   name: string;
   created_at: number;
-  uid: string;
-  snippets?: Record<
-    string,
-    {
-      created_at: number;
-      title: string;
-    }
-  >;
+  user_id: string;
+
+  snippets?: EmbeddedSnippet[];
 }
 
 export type NewListDTO = Omit<List, 'id' | 'created_at' | 'snippets'>;
-export type NewListWithTimestampDTO = NewListDTO & {
-  created_at: FieldValue;
-};
 export type EditListDTO = Pick<List, 'id' | 'name'>;

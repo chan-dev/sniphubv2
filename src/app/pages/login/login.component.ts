@@ -4,7 +4,6 @@ import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
 
 import { AuthService } from '../../services/auth.service';
-import { UsersService } from '../../services/users.service';
 
 @Component({
   selector: 'app-login',
@@ -15,14 +14,17 @@ import { UsersService } from '../../services/users.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private authService = inject(AuthService);
-  private usersService = inject(UsersService);
+  private authServicev2 = inject(AuthService);
 
   private router = inject(Router);
 
   async login() {
     try {
-      await this.authService.login();
+      const { error } = await this.authServicev2.login();
+
+      if (error) {
+        throw error;
+      }
 
       this.router.navigate(['/home']);
     } catch (error) {
@@ -32,7 +34,10 @@ export class LoginComponent {
 
   async register() {
     try {
-      await this.authService.register();
+      const { error } = await this.authServicev2.login();
+      if (error) {
+        throw error;
+      }
 
       this.router.navigate(['/home']);
     } catch (error) {

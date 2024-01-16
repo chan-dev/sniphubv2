@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
@@ -22,7 +21,6 @@ import { SaveSnippetDTO } from '../../models/snippet';
 import { AuthService } from '../../services/auth.service';
 import { SnippetService } from '../../services/snippets.service';
 import { ModalService } from '../../services/modal.service';
-
 @Component({
   selector: 'app-list-group',
   standalone: true,
@@ -62,8 +60,8 @@ export class ListGroupComponent {
 
   listName = '';
   snippetTitle = '';
-  currentUser = this.authService.currentUser;
-  currentUserId = this.currentUser?.uid;
+  currentUser = this.authService.session?.user;
+  currentUserId = this.currentUser?.id;
 
   editList(list: EditListDTO) {
     const modalAfterClosed$ = this.modalService.openModal({
@@ -90,14 +88,11 @@ export class ListGroupComponent {
         name: this.listName,
       };
 
-      this.listsService
-        .editList(editListDTO)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((result) => {
-          console.log('edit succesful', result);
-          this.openSnackbar('List updated');
-          this.listName = '';
-        });
+      this.listsService.editList(editListDTO).then((result) => {
+        console.log('edit succesful', result);
+        this.openSnackbar('List updated');
+        this.listName = '';
+      });
     });
   }
 
@@ -119,13 +114,9 @@ export class ListGroupComponent {
         return;
       }
 
-      this.listsService
-        .deleteList(id)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((result) => {
-          console.log('delete succesful', result);
-          this.openSnackbar('List deleted');
-        });
+      this.listsService.deleteList(id).then((result) => {
+        this.openSnackbar('List deleted');
+      });
     });
   }
 
@@ -157,7 +148,7 @@ export class ListGroupComponent {
         language: '',
         list_id: listId,
         title: this.snippetTitle,
-        uid: this.currentUserId,
+        user_id: this.currentUserId,
       };
 
       await this.snippetsService.addSnippet(newSnippet);

@@ -20,10 +20,8 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Observable, map, of, shareReplay, switchMap } from 'rxjs';
+import { Subject, map, of, shareReplay, switchMap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
-import { serverTimestamp } from '@angular/fire/firestore';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -33,18 +31,18 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { List, NewListWithTimestampDTO } from '../../models/list';
+import { List, NewListDTO } from '../../models/list';
 import { ListsService } from '../../services/lists.service';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
 import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
-import { AuthService } from '../../services/auth.service';
 import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
 import { Snippet } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
 import { ModalService } from '../../services/modal.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -106,10 +104,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   lists: List[] = [];
   listName = '';
   searchText = '';
-  currentUser = this.authService.currentUser;
-  currentUserId = this.currentUser?.uid;
+  currentUser = this.authService.session?.user;
+  currentUserId = this.currentUser?.id;
 
-  matchingSnippets$!: Observable<Snippet[]>;
+  searchResultsSubject = new Subject<Snippet[]>();
+  matchingSnippets$ = this.searchResultsSubject.asObservable();
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
     map((params) => params.get('snippetId')),
@@ -118,7 +117,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   activeSnippet$ = this.activeSnippetId$.pipe(
     switchMap((id) => {
-      console.log('snippet id', id);
       if (!id) {
         return of(null);
       }
@@ -126,18 +124,23 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }),
   );
 
-  ngOnInit() {
+  async ngOnInit() {
     if (!this.currentUserId) {
       return;
     }
 
-    return this.listsService
-      .getLists(this.currentUserId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((lists) => {
-        this.lists = lists;
+    const { data, error } = await this.listsService.getLists(
+      this.currentUserId,
+    );
+
+    if (error) {
+      console.error('error', error);
+    } else {
+      if (data) {
+        this.lists = data;
         this.cdRef.markForCheck();
-      });
+      }
+    }
   }
 
   ngAfterViewInit(): void {
@@ -190,7 +193,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     modalAfterClosed$.subscribe((confirm) => {
-      console.log('The dialog was closed', { confirm });
       if (!confirm) {
         this.listName = '';
         return;
@@ -201,19 +203,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      const newList: NewListWithTimestampDTO = {
+      const newList: NewListDTO = {
         name: this.listName,
-        uid: this.currentUserId,
-        created_at: serverTimestamp(),
+        user_id: this.currentUserId,
       };
 
-      this.listsService
-        .createList(newList)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => {
-          this.listName = '';
-          this.cdRef.markForCheck();
-        });
+      this.listsService.createList(newList).then(() => {
+        this.listName = '';
+        this.cdRef.markForCheck();
+      });
     });
   }
 
@@ -235,10 +233,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  searchSnippets(searchPattern: string) {
-    console.log('searchPattern', searchPattern);
+  async searchSnippets(searchPattern: string) {
+    const { data, error } =
+      await this.snippetsService.searchSnippets(searchPattern);
 
-    this.matchingSnippets$ = this.snippetsService.searchSnippets(searchPattern);
+    if (data) {
+      this.searchResultsSubject.next(data);
+    }
   }
 
   navigateToSnippet(snippetId: string) {

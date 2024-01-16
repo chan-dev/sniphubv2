@@ -108,7 +108,7 @@ export class ListComponent {
         return;
       }
 
-      await this.snippetsService.deleteSnippet(id, listId);
+      await this.snippetsService.deleteSnippet(id);
 
       const firstNonDeletedSnippetId = Object.keys(
         this.list.snippets || {},

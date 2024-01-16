@@ -100,7 +100,6 @@ export class SnippetComponent implements OnInit {
   isTitleEditable = false;
 
   ngOnInit(): void {
-    console.log('snippet component ngOnInit');
     this.snippetSubject
       .pipe(
         // Everytime we switch to a different state
