@@ -96,7 +96,7 @@ export class ListGroupComponent {
     });
   }
 
-  deleteList(id: string) {
+  deleteList(id: number) {
     const modalAfterClosed$ = this.modalService.openModal({
       dialogOptions: {
         width: '400px',
@@ -120,7 +120,7 @@ export class ListGroupComponent {
     });
   }
 
-  adSnippet(listId: string) {
+  adSnippet(listId: number) {
     const modalAfterClosed$ = this.modalService.openModal({
       dialogOptions: {
         width: '400px',

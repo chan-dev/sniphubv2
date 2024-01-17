@@ -69,7 +69,7 @@ export class SnippetComponent implements OnInit {
   private snippetSubject = new BehaviorSubject<Snippet | null>(null);
 
   private readonly defaultSnippet = {
-    id: '',
+    id: 0,
     title: 'Untitled',
     content: '',
     language: '',
@@ -169,7 +169,7 @@ export class SnippetComponent implements OnInit {
     }
   }
 
-  makeEditorTitleEditable(id: string) {
+  makeEditorTitleEditable(id: number) {
     // Add visual cue for editing
     this.isTitleEditable = true;
   }
@@ -178,7 +178,7 @@ export class SnippetComponent implements OnInit {
     this.isTitleEditable = open;
   }
 
-  async saveSnippet(snippetId: string) {
+  async saveSnippet(snippetId: number) {
     if (snippetId) {
       try {
         this.savingInProgress = true;
@@ -192,11 +192,15 @@ export class SnippetComponent implements OnInit {
           data.title = this.editorTitle;
         }
 
-        await this.snippetService.updateSnippet(
+        const { error } = await this.snippetService.updateSnippet(
           snippetId,
           this.activeSnippet.list_id,
           data,
         );
+
+        if (error) {
+          throw error;
+        }
 
         this.savingInProgress = false;
         // this.shouldEdit = false;
@@ -206,6 +210,7 @@ export class SnippetComponent implements OnInit {
       } catch (error) {
         console.error(error);
         this.openSnackbar('Failed to save snippet');
+        this.savingInProgress = false;
       }
     }
   }

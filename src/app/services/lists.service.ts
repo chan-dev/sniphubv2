@@ -26,7 +26,7 @@ export class ListsService {
       .eq('id', id);
   }
 
-  deleteList(id: string) {
+  deleteList(id: number) {
     return db.from('lists').delete().eq('id', id);
   }
 }

@@ -89,7 +89,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private removeSearchEventListener?: Function;
 
   private readonly defaultSnippet = {
-    id: '',
+    id: 0,
     title: 'Untitled',
     content: '',
     language: '',
@@ -242,7 +242,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  navigateToSnippet(snippetId: string) {
+  navigateToSnippet(snippetId: number) {
     this.router.navigate([], {
       queryParams: {
         snippetId,

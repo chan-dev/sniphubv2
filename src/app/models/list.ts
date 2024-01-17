@@ -1,11 +1,11 @@
 type EmbeddedSnippet = {
-  id: string;
+  id: number;
   title: string;
   created_at: number;
 };
 
 export interface List {
-  id: string;
+  id: number;
   name: string;
   created_at: number;
   user_id: string;

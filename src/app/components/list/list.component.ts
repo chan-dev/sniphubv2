@@ -54,14 +54,14 @@ export class ListComponent {
   isExpanded = false;
   snippetTitle = '';
 
-  editList(id: string) {
+  editList(id: number) {
     console.log('editList', id);
   }
-  deleteList(id: string) {
+  deleteList(id: number) {
     console.log('deleteList', id);
   }
 
-  editSnippet(id: string, title: string, listId: string) {
+  editSnippet(id: number, title: string, listId: number) {
     this.snippetTitle = title;
 
     const modalAfterClosed$ = this.modalService.openModal({
@@ -90,7 +90,7 @@ export class ListComponent {
       this.openSnackbar('Snippet updated');
     });
   }
-  deleteSnippet(id: string, listId: string) {
+  deleteSnippet(id: number) {
     const modalAfterClosed$ = this.modalService.openModal({
       dialogOptions: {
         width: '400px',
@@ -112,7 +112,7 @@ export class ListComponent {
 
       const firstNonDeletedSnippetId = Object.keys(
         this.list.snippets || {},
-      ).find((snippetId) => snippetId !== id);
+      ).find((snippetId) => snippetId !== id.toString());
 
       if (!firstNonDeletedSnippetId) {
         this.router.navigate(['/home']);

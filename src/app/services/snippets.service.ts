@@ -18,7 +18,7 @@ export class SnippetService {
     return db.from('snippets').insert(snippet);
   }
 
-  updateSnippet(id: string, list_id: string, snippet: UpdateSnippetDTO) {
+  updateSnippet(id: number, list_id: number, snippet: UpdateSnippetDTO) {
     return db
       .from('snippets')
       .update({
@@ -28,7 +28,7 @@ export class SnippetService {
       .eq('id', id);
   }
 
-  deleteSnippet(id: string) {
+  deleteSnippet(id: number) {
     return db.from('snippets').delete().eq('id', id);
   }
 
