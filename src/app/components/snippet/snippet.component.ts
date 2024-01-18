@@ -135,9 +135,10 @@ export class SnippetComponent implements OnInit {
           this.resetToDefaults();
         }
       });
+    this.onEditorInit();
   }
 
-  onEditorInit(_editor: any) {
+  onEditorInit() {
     // TODO: add a service for local storage
     const languages = localStorage.getItem('languages');
     if (languages) {
