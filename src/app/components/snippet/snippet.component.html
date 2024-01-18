@@ -4,7 +4,7 @@
     [ngClass]="{ 'cursor-pointer': !isEditInProgress }"
     (click)="setTitleEditable(true)"
   >
-    @if (!isTitleEditable || savingInProgress) {
+    @if (!isTitleEditable || (savingInProgress$ | async)) {
       <span
         [attr.contenteditable]="isTitleEditable"
         class="outline-none"
@@ -21,12 +21,12 @@
           (ngModelChange)="updateTitle()"
           autofocus
         />
-        @if (!savingInProgress) {
+        @if (!(savingInProgress$ | async)) {
           <button
             type="button"
             class="rounded-r bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
             (click)="setTitleEditable(false); $event.stopPropagation()"
-            [disabled]="savingInProgress"
+            [disabled]="savingInProgress$ | async"
           >
             Update
           </button>
@@ -51,9 +51,9 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="saveSnippet(activeSnippet.id)"
-      [disabled]="!isEditInProgress || savingInProgress"
+      [disabled]="!isEditInProgress || (savingInProgress$ | async)"
     >
-      @if (savingInProgress) {
+      @if (savingInProgress$ | async) {
         <ng-icon name="tablerLoader2" class="mr-1 animate-spin"></ng-icon>
       }
       Save
@@ -62,7 +62,7 @@
       type="button"
       class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white disabled:opacity-50"
       (click)="cancelUpdate()"
-      [disabled]="!isEditInProgress || savingInProgress"
+      [disabled]="!isEditInProgress || (savingInProgress$ | async)"
     >
       Cancel
     </button>

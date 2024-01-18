@@ -26,7 +26,7 @@ export const unsavedChangesGuard: CanDeactivateFn<unknown> = (
         );
 
         if (shouldLeaveRoute) {
-          trackUnsavedService.reset();
+          trackUnsavedService.changeCancelled();
           return true;
         } else {
           return false;

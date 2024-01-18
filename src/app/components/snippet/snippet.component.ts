@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, shareReplay, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -66,7 +66,10 @@ export class SnippetComponent implements OnInit {
   private trackUnsavedService = inject(TrackUnsavedService);
   private modalService = inject(ModalService);
 
-  private snippetSubject = new BehaviorSubject<Snippet | null>(null);
+  private readonly snippetSubject = new BehaviorSubject<Snippet | null>(null);
+  private readonly savingInProgressSubject = new BehaviorSubject<boolean>(
+    false,
+  );
 
   private readonly defaultSnippet = {
     id: 0,
@@ -81,7 +84,9 @@ export class SnippetComponent implements OnInit {
   editorTitle = this.activeSnippet.title;
   editorLanguage = this.activeSnippet.language;
 
-  savingInProgress = false;
+  savingInProgress$ = this.savingInProgressSubject
+    .asObservable()
+    .pipe(shareReplay(1));
 
   editorOptions: EditorOptions = {
     theme: 'vs-dark',
@@ -104,7 +109,7 @@ export class SnippetComponent implements OnInit {
       .pipe(
         // Everytime we switch to a different state
         // reset local state.
-        tap(() => this.resetToDefaults()),
+        tap(() => this.resetToDefaults(true)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((snippet) => {
@@ -126,15 +131,16 @@ export class SnippetComponent implements OnInit {
         this.cdRef.markForCheck();
       });
 
-    this.trackUnsavedService.hasUnsaved$
+    this.trackUnsavedService.state$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.isEditInProgress = value;
+      .subscribe((state) => {
+        this.isEditInProgress = state === 'Pending';
 
-        if (!value) {
-          this.resetToDefaults();
+        if (!this.isEditInProgress) {
+          this.resetToDefaults(state === 'Cancelled');
         }
       });
+
     this.onEditorInit();
   }
 
@@ -156,17 +162,17 @@ export class SnippetComponent implements OnInit {
   updateTitle() {
     // const target = event.target as HTMLElement;
     // this.editorTitle = target.textContent || '';
-    this.trackUnsavedService.trackChange(true);
+    this.trackUnsavedService.changePending();
   }
 
   updateEditorLanguage(id: string) {
     this.setEditorOptions({ language: id });
-    this.trackUnsavedService.trackChange(true);
+    this.trackUnsavedService.changePending();
   }
 
   updateEditorContent(content: string) {
     if (content !== this.activeSnippet.content) {
-      this.trackUnsavedService.trackChange(true);
+      this.trackUnsavedService.changePending();
     }
   }
 
@@ -182,8 +188,8 @@ export class SnippetComponent implements OnInit {
   async saveSnippet(snippetId: number) {
     if (snippetId) {
       try {
-        this.savingInProgress = true;
-        // TODO: add alert
+        this.savingInProgressSubject.next(true);
+
         const data: UpdateSnippetDTO = {
           content: this.editorContent,
           language: this.editorLanguage,
@@ -203,15 +209,14 @@ export class SnippetComponent implements OnInit {
           throw error;
         }
 
-        this.savingInProgress = false;
-        // this.shouldEdit = false;
-        this.trackUnsavedService.trackChange(false);
-        // this.updateEditorReadonly(true);
+        this.savingInProgressSubject.next(false);
+        this.trackUnsavedService.changeSaved();
+
         this.openSnackbar('Snippet saved');
       } catch (error) {
         console.error(error);
         this.openSnackbar('Failed to save snippet');
-        this.savingInProgress = false;
+        this.savingInProgressSubject.next(false);
       }
     }
   }
@@ -234,8 +239,8 @@ export class SnippetComponent implements OnInit {
       if (!confirm) {
         return;
       }
-      this.resetToDefaults();
-      this.trackUnsavedService.reset();
+      this.resetToDefaults(true);
+      this.trackUnsavedService.changeCancelled();
       this.cdRef.markForCheck();
     });
   }
@@ -244,11 +249,20 @@ export class SnippetComponent implements OnInit {
     this.snackbarService.openSnackbar(message);
   }
 
-  private resetToDefaults() {
+  private resetToDefaults(resetAll: boolean) {
     this.isTitleEditable = false;
-    this.editorContent = this.activeSnippet?.content;
-    this.editorTitle = this.activeSnippet?.title;
-    this.editorLanguage = this.activeSnippet?.language;
+    this.hasUnsavedChanges = false;
+
+    // Reset local snippet state
+    if (resetAll) {
+      this.editorContent = this.activeSnippet?.content;
+      this.editorTitle = this.activeSnippet?.title;
+      this.editorLanguage = this.activeSnippet?.language;
+    }
+  }
+
+  private resetState() {
+    this.isTitleEditable = false;
     this.hasUnsavedChanges = false;
   }
 
