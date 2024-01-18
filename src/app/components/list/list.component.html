@@ -6,15 +6,15 @@
   {{ list.name }}
 </span>
 
-@if (isExpanded && (list.snippets | keyvalue)?.length) {
+@if (isExpanded && list.snippets?.length) {
   <ul (click)="$event.stopPropagation()">
-    @for (snippet of list.snippets | keyvalue; track snippet.key) {
+    @for (snippet of list.snippets; track snippet.id) {
       <li class="relative pl-4" [matMenuTriggerFor]="snippetMenu" isContextMenu>
-        <a routerLink="." [queryParams]="{ snippetId: snippet.key }">{{
-          snippet.value.title
+        <a routerLink="." [queryParams]="{ snippetId: snippet.id }">{{
+          snippet.title
         }}</a>
 
-        @if (activeSnippetId === snippet.key) {
+        @if (activeSnippetId === snippet.id) {
           <!-- TODO: find a better way to achieve this styling. Expand to the entire width of the sidebar -->
           <div
             class="absolute inset-x-0 top-0 -z-10 -ml-[32px] -mr-[9px] h-full bg-gray-200"
@@ -24,11 +24,11 @@
         <mat-menu #snippetMenu="matMenu" [hasBackdrop]="false">
           <button
             mat-menu-item
-            (click)="editSnippet(snippet.key, snippet.value.title, list.id)"
+            (click)="editSnippet(snippet.id, snippet.title, list.id)"
           >
             Rename
           </button>
-          <button mat-menu-item (click)="deleteSnippet(snippet.key, list.id)">
+          <button mat-menu-item (click)="deleteSnippet(snippet.id)">
             Delete
           </button>
         </mat-menu>

@@ -1,94 +1,41 @@
-import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
-import {
-  collection,
-  deleteField,
-  doc,
-  docData,
-  Firestore,
-  serverTimestamp,
-  writeBatch,
-} from '@angular/fire/firestore';
+import { Injectable } from '@angular/core';
 
-import {
-  UpdateSnippetDTO,
-  Snippet,
-  SaveSnippetDTO,
-  SaveSnippetWithTimestampDTO,
-  EmbeddedSnippetUnderList,
-} from '../models/snippet';
+import { UpdateSnippetDTO, SaveSnippetDTO } from '../models/snippet';
+import { db } from '../db';
 
 @Injectable({ providedIn: 'root' })
 export class SnippetService {
-  private db = inject(Firestore);
-
-  getSnippet(id: string) {
-    return docData(doc(this.db, 'snippets', id), {
-      idField: 'id',
-    }).pipe(
-      map((snippet) => {
-        return snippet as Snippet;
-      }),
-    );
+  getSnippet(id: number) {
+    return db
+      .from('snippets')
+      .select('id, title, content, language, created_at, user_id, list_id')
+      .eq('id', id)
+      .limit(1)
+      .single();
   }
 
   addSnippet(snippet: SaveSnippetDTO) {
-    const listId = snippet.list_id;
-
-    const batch = writeBatch(this.db);
-
-    const snippetsCollectionRef = collection(this.db, 'snippets');
-    const newSnippetDocRef = doc(snippetsCollectionRef);
-    const newSnippetId = newSnippetDocRef.id;
-    const newSnippet: SaveSnippetWithTimestampDTO = {
-      ...snippet,
-      created_at: serverTimestamp(),
-    };
-
-    batch.set(newSnippetDocRef, newSnippet);
-
-    const listDocRef = doc(this.db, 'lists', listId);
-
-    const embeddedSnippet: EmbeddedSnippetUnderList = {
-      title: snippet.title,
-      created_at: serverTimestamp(),
-    };
-
-    batch.update(listDocRef, `snippets.${newSnippetId}`, embeddedSnippet);
-
-    return batch.commit();
+    return db.from('snippets').insert(snippet);
   }
 
-  updateSnippet(id: string, list_id: string, snippet: UpdateSnippetDTO) {
-    const batch = writeBatch(this.db);
+  updateSnippet(id: number, list_id: number, snippet: UpdateSnippetDTO) {
+    return db
+      .from('snippets')
+      .update({
+        ...snippet,
+        list_id,
+      })
+      .eq('id', id);
+  }
 
-    const embeddedSnippetUnderListRef = doc(this.db, 'lists', list_id);
+  deleteSnippet(id: number) {
+    return db.from('snippets').delete().eq('id', id);
+  }
 
-    const snippetDocRef = doc(this.db, 'snippets', id);
-
-    batch.update(snippetDocRef, {
-      ...snippet,
+  searchSnippets(searchPattern: string) {
+    return db.from('snippets').select().textSearch('title', searchPattern, {
+      type: 'websearch',
+      config: 'english',
     });
-
-    if (snippet.title) {
-      batch.update(embeddedSnippetUnderListRef, `snippets.${id}`, {
-        title: snippet.title,
-      });
-    }
-
-    return batch.commit();
-  }
-
-  deleteSnippet(id: string, listId: string) {
-    const batch = writeBatch(this.db);
-    // TODO: should we wrap this in Observable?
-    // return deleteDoc(doc(this.db, 'snippets', id));
-    const snippetDocRef = doc(this.db, 'snippets', id);
-    batch.delete(snippetDocRef);
-
-    const listDocRef = doc(this.db, 'lists', listId);
-    batch.update(listDocRef, `snippets.${id}`, deleteField());
-
-    return batch.commit();
   }
 }

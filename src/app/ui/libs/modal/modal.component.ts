@@ -22,6 +22,16 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 
+export interface ModalComponentProps {
+  titleTemplateRef?: TemplateRef<any | undefined>;
+  bodyTemplateRef?: TemplateRef<any | undefined>;
+  ctaTemplateRef?: TemplateRef<any | undefined>;
+  title?: string;
+  body?: string;
+  confirmButtonLabel?: string;
+  cancelButtonLabel?: string;
+}
+
 @Component({
   selector: 'app-modal',
   standalone: true,

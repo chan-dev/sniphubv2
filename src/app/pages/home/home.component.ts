@@ -1,8 +1,12 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  NgZone,
+  OnDestroy,
   OnInit,
+  Renderer2,
   TemplateRef,
   ViewChild,
   inject,
@@ -15,11 +19,10 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { map, shareReplay } from 'rxjs';
-import { provideComponentStore } from '@ngrx/component-store';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
-import { serverTimestamp } from '@angular/fire/firestore';
+import { MatMenuModule } from '@angular/material/menu';
+import { provideComponentStore } from '@ngrx/component-store';
+import { Subject, map, shareReplay, switchMap, of } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -29,15 +32,19 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { List, NewListWithTimestampDTO } from '../../models/list';
+import { List, NewListDTO } from '../../models/list';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
 import { DropdownMenuDirective } from '../../directives/dropdown-menu.directive';
 import { ModalComponent } from '../../ui/libs/modal/modal.component';
-import { AuthService } from '../../services/auth.service';
 import { DefaultSnippetViewComponent } from '../../components/default-snippet-view/default-snippet-view.component';
 import { SnippetsStore } from '../../services/snippets.store';
+import { Snippet } from '../../models/snippet';
+import { SnippetService } from '../../services/snippets.service';
+import { ModalService } from '../../services/modal.service';
+import { AuthService } from '../../services/auth.service';
+import { ListsService } from '../../services/lists.service';
 
 @Component({
   selector: 'app-home',
@@ -70,32 +77,81 @@ import { SnippetsStore } from '../../services/snippets.store';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdRef = inject(ChangeDetectorRef);
-  private dialog = inject(MatDialog);
   private authService = inject(AuthService);
 
   private snippetsStore = inject(SnippetsStore);
 
+  private ngZone = inject(NgZone);
+  private renderer = inject(Renderer2);
+  private listsService = inject(ListsService);
+  private snippetsService = inject(SnippetService);
+  private modalService = inject(ModalService);
+
+  private removeSearchEventListener?: Function;
+
+  private readonly defaultSnippet = {
+    id: 0,
+    title: 'Untitled',
+    content: '',
+    language: '',
+  } as Snippet;
+
   vm$ = this.snippetsStore.vm$;
 
-  @ViewChild('bodyTemplateRef') bodyTemplateRef!: TemplateRef<any>;
+  @ViewChild('createListBodyTemplateRef')
+  createListBodyTemplateRef!: TemplateRef<any>;
+
+  @ViewChild('searchBodyTemplateRef')
+  searchBodyTemplateRef!: TemplateRef<any>;
 
   lists: List[] = [];
   listName = '';
-  currentUser = this.authService.currentUser;
-  currentUserId = this.currentUser?.uid;
+  searchText = '';
+  currentUser = this.authService.session?.user;
+  currentUserId = this.currentUser?.id;
+
+  searchResultsSubject = new Subject<Snippet[]>();
+  matchingSnippets$ = this.searchResultsSubject.asObservable();
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('snippetId')),
+    map((params) => +(params.get('snippetId') ?? 0)),
     shareReplay(1),
   );
 
   ngOnInit() {
     this.snippetsStore.getLists(this.currentUserId ?? null);
     this.snippetsStore.getActiveSnippet(this.activeSnippetId$);
+  }
+
+  ngAfterViewInit(): void {
+    // Use this approach instead of hostlistener to prevent
+    // unnecessary change detection lifecycles
+    this.ngZone.runOutsideAngular(() => {
+      this.removeSearchEventListener = this.renderer.listen(
+        document.body,
+        'keydown',
+        (event) => {
+          if (event.ctrlKey && event.key === 'k') {
+            console.log('open search modal');
+            event.preventDefault();
+
+            this.ngZone.run(() => {
+              this.openSearchModal();
+            });
+          }
+        },
+      );
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.removeSearchEventListener) {
+      this.removeSearchEventListener();
+    }
   }
 
   async logout() {
@@ -108,17 +164,21 @@ export class HomeComponent implements OnInit {
   }
 
   createList() {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: true,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Create new list',
+        bodyTemplateRef: this.createListBodyTemplateRef,
+        confirmButtonLabel: 'Create',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Create new list';
-    dialogRef.componentInstance.bodyTemplateRef = this.bodyTemplateRef;
-    dialogRef.componentInstance.confirmButtonLabel = 'Create';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
-      console.log('The dialog was closed', { confirm });
+    modalAfterClosed$.subscribe((confirm) => {
       if (!confirm) {
+        this.listName = '';
         return;
       }
 
@@ -127,10 +187,9 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      const newList: NewListWithTimestampDTO = {
+      const newList: NewListDTO = {
         name: this.listName,
-        uid: this.currentUserId,
-        created_at: serverTimestamp(),
+        user_id: this.currentUserId,
       };
 
       this.snippetsStore.saveList({
@@ -141,5 +200,42 @@ export class HomeComponent implements OnInit {
         },
       });
     });
+  }
+
+  openSearchModal() {
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Search snippets',
+        bodyTemplateRef: this.searchBodyTemplateRef,
+        confirmButtonLabel: 'Search',
+      },
+    });
+
+    modalAfterClosed$.subscribe((_confirm) => {
+      this.searchText = '';
+    });
+  }
+
+  async searchSnippets(searchPattern: string) {
+    // TODO: update component store
+    const { data, error } =
+      await this.snippetsService.searchSnippets(searchPattern);
+
+    if (data) {
+      this.searchResultsSubject.next(data);
+    }
+  }
+
+  navigateToSnippet(snippetId: number) {
+    this.router.navigate([], {
+      queryParams: {
+        snippetId,
+      },
+    });
+    this.modalService.closeDialog();
   }
 }

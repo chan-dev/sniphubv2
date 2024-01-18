@@ -10,19 +10,19 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, shareReplay, tap } from 'rxjs';
 import { NgIconComponent } from '@ng-icons/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 
 import { Snippet, UpdateSnippetDTO } from '../../models/snippet';
 import { SnackbarService } from '../../services/snackbar.service';
 import { TrackUnsavedService } from '../../services/track-unsaved.service';
 import { EditorOptions } from '../../types/editor';
 import { AutoFocusDirective } from '../../directives/auto-focus.directive';
-import { ModalComponent } from '../../ui/libs/modal/modal.component';
+
 import { SnippetsStore } from '../../services/snippets.store';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-snippet',
@@ -62,14 +62,19 @@ export class SnippetComponent implements OnInit {
 
   private cdRef = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
-  private dialog = inject(MatDialog);
   private snippetsStore = inject(SnippetsStore);
+
   private snackbarService = inject(SnackbarService);
   private trackUnsavedService = inject(TrackUnsavedService);
-  private snippetSubject = new BehaviorSubject<Snippet | null>(null);
+  private modalService = inject(ModalService);
+
+  private readonly snippetSubject = new BehaviorSubject<Snippet | null>(null);
+  private readonly savingInProgressSubject = new BehaviorSubject<boolean>(
+    false,
+  );
 
   private readonly defaultSnippet = {
-    id: '',
+    id: 0,
     title: 'Untitled',
     content: '',
     language: '',
@@ -81,7 +86,9 @@ export class SnippetComponent implements OnInit {
   editorTitle = this.activeSnippet.title;
   editorLanguage = this.activeSnippet.language;
 
-  savingInProgress = false;
+  savingInProgress$ = this.savingInProgressSubject
+    .asObservable()
+    .pipe(shareReplay(1));
 
   editorOptions: EditorOptions = {
     theme: 'vs-dark',
@@ -100,12 +107,11 @@ export class SnippetComponent implements OnInit {
   isTitleEditable = false;
 
   ngOnInit(): void {
-    console.log('snippet component ngOnInit');
     this.snippetSubject
       .pipe(
         // Everytime we switch to a different state
         // reset local state.
-        tap(() => this.resetToDefaults()),
+        tap(() => this.resetToDefaults(true)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((snippet) => {
@@ -127,18 +133,20 @@ export class SnippetComponent implements OnInit {
         this.cdRef.markForCheck();
       });
 
-    this.trackUnsavedService.hasUnsaved$
+    this.trackUnsavedService.state$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.isEditInProgress = value;
+      .subscribe((state) => {
+        this.isEditInProgress = state === 'Pending';
 
-        if (!value) {
-          this.resetToDefaults();
+        if (!this.isEditInProgress) {
+          this.resetToDefaults(state === 'Cancelled');
         }
       });
+
+    this.onEditorInit();
   }
 
-  onEditorInit(_editor: any) {
+  onEditorInit() {
     // TODO: add a service for local storage
     const languages = localStorage.getItem('languages');
     if (languages) {
@@ -156,21 +164,21 @@ export class SnippetComponent implements OnInit {
   updateTitle() {
     // const target = event.target as HTMLElement;
     // this.editorTitle = target.textContent || '';
-    this.trackUnsavedService.trackChange(true);
+    this.trackUnsavedService.changePending();
   }
 
   updateEditorLanguage(id: string) {
     this.setEditorOptions({ language: id });
-    this.trackUnsavedService.trackChange(true);
+    this.trackUnsavedService.changePending();
   }
 
   updateEditorContent(content: string) {
     if (content !== this.activeSnippet.content) {
-      this.trackUnsavedService.trackChange(true);
+      this.trackUnsavedService.changePending();
     }
   }
 
-  makeEditorTitleEditable(id: string) {
+  makeEditorTitleEditable(id: number) {
     // Add visual cue for editing
     this.isTitleEditable = true;
   }
@@ -179,11 +187,11 @@ export class SnippetComponent implements OnInit {
     this.isTitleEditable = open;
   }
 
-  async saveSnippet(snippetId: string) {
+  async saveSnippet(snippetId: number) {
     if (snippetId) {
       try {
-        this.savingInProgress = true;
-        // TODO: add alert
+        this.savingInProgressSubject.next(true);
+
         const data: UpdateSnippetDTO = {
           content: this.editorContent,
           language: this.editorLanguage,
@@ -198,37 +206,39 @@ export class SnippetComponent implements OnInit {
           list_id: this.activeSnippet.list_id,
           snippet: data,
           cb: () => {
-            this.savingInProgress = false;
-            // this.shouldEdit = false;
-            this.trackUnsavedService.trackChange(false);
-            // this.updateEditorReadonly(true);
+            this.savingInProgressSubject.next(false);
+            this.trackUnsavedService.changeSaved();
             this.openSnackbar('Snippet saved');
           },
         });
       } catch (error) {
         console.error(error);
         this.openSnackbar('Failed to save snippet');
+        this.savingInProgressSubject.next(false);
       }
     }
   }
 
   cancelUpdate() {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Cancel Update',
+        body: 'You have unsaved changes. Are you sure you want to discard them?',
+        confirmButtonLabel: 'Ok',
+        cancelButtonLabel: 'Close',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Cancel Update';
-    dialogRef.componentInstance.body =
-      'You have unsaved changes. Are you sure you want to discard them?';
-    dialogRef.componentInstance.confirmButtonLabel = 'Ok';
-    dialogRef.componentInstance.cancelButtonLabel = 'Close';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
+    modalAfterClosed$.subscribe((confirm) => {
       if (!confirm) {
         return;
       }
-      this.resetToDefaults();
-      this.trackUnsavedService.reset();
+      this.resetToDefaults(true);
+      this.trackUnsavedService.changeCancelled();
       this.cdRef.markForCheck();
     });
   }
@@ -237,11 +247,20 @@ export class SnippetComponent implements OnInit {
     this.snackbarService.openSnackbar(message);
   }
 
-  private resetToDefaults() {
+  private resetToDefaults(resetAll: boolean) {
     this.isTitleEditable = false;
-    this.editorContent = this.activeSnippet?.content;
-    this.editorTitle = this.activeSnippet?.title;
-    this.editorLanguage = this.activeSnippet?.language;
+    this.hasUnsavedChanges = false;
+
+    // Reset local snippet state
+    if (resetAll) {
+      this.editorContent = this.activeSnippet?.content;
+      this.editorTitle = this.activeSnippet?.title;
+      this.editorLanguage = this.activeSnippet?.language;
+    }
+  }
+
+  private resetState() {
+    this.isTitleEditable = false;
     this.hasUnsavedChanges = false;
   }
 

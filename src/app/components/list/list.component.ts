@@ -8,17 +8,16 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 import { List } from '../../models/list';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
-import { ModalComponent } from '../../ui/libs/modal/modal.component';
 import { SnackbarService } from '../../services/snackbar.service';
-import { UpdateSnippetDTO } from '../../models/snippet';
 import { SnippetsStore } from '../../services/snippets.store';
+import { ModalService } from '../../services/modal.service';
+import { UpdateSnippetDTO } from '../../models/snippet';
 
 @Component({
   selector: 'app-list',
@@ -41,39 +40,44 @@ import { SnippetsStore } from '../../services/snippets.store';
 })
 export class ListComponent {
   @Input() list!: List;
-  @Input() activeSnippetId?: string;
+  @Input() activeSnippetId?: number;
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
   @ViewChild('editSnippetBodyTemplateRef')
   editListBodyTemplateRef!: TemplateRef<any>;
 
   private router = inject(Router);
-  private dialog = inject(MatDialog);
   private snackbarService = inject(SnackbarService);
+
   private snippetsStore = inject(SnippetsStore);
+  private modalService = inject(ModalService);
 
   isExpanded = false;
   snippetTitle = '';
 
-  editList(id: string) {
+  editList(id: number) {
     console.log('editList', id);
   }
-  deleteList(id: string) {
+  deleteList(id: number) {
     console.log('deleteList', id);
   }
 
-  editSnippet(id: string, title: string, listId: string) {
+  editSnippet(id: number, title: string, listId: number) {
     this.snippetTitle = title;
 
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Rename snippet',
+        bodyTemplateRef: this.editListBodyTemplateRef,
+        confirmButtonLabel: 'Save',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Rename snippet';
-    dialogRef.componentInstance.bodyTemplateRef = this.editListBodyTemplateRef;
-    dialogRef.componentInstance.confirmButtonLabel = 'Save';
-
-    dialogRef.afterClosed().subscribe(async (confirm) => {
+    modalAfterClosed$.subscribe(async (confirm) => {
       if (!confirm) {
         return;
       }
@@ -93,28 +97,30 @@ export class ListComponent {
       });
     });
   }
-  deleteSnippet(id: string, listId: string) {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+  deleteSnippet(id: number) {
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Delete snippet',
+        body: 'Are you sure you want to delete this snippet?',
+        confirmButtonLabel: 'Delete',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Delete snippet';
-    dialogRef.componentInstance.body =
-      'Are you sure you want to delete this snippet?';
-    dialogRef.componentInstance.confirmButtonLabel = 'Delete';
-
-    dialogRef.afterClosed().subscribe(async (confirm) => {
+    modalAfterClosed$.subscribe(async (confirm) => {
       if (!confirm) {
         return;
       }
 
       this.snippetsStore.deleteSnippet({
         id,
-        list_id: listId,
         cb: () => {
           const firstNonDeletedSnippetId = Object.keys(
             this.list.snippets || {},
-          ).find((snippetId) => snippetId !== id);
+          ).find((snippetId) => +snippetId !== id);
 
           if (!firstNonDeletedSnippetId) {
             this.router.navigate(['/home']);

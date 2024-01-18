@@ -15,10 +15,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
 import { ContextMenuDirective } from '../../directives/context-menu.directive';
-import { ModalComponent } from '../../ui/libs/modal/modal.component';
-import { SnackbarService } from '../../services/snackbar.service';
 import { SaveSnippetDTO } from '../../models/snippet';
 import { AuthService } from '../../services/auth.service';
+import { ModalService } from '../../services/modal.service';
+import { SnackbarService } from '../../services/snackbar.service';
 import { SnippetsStore } from '../../services/snippets.store';
 
 @Component({
@@ -43,7 +43,7 @@ import { SnippetsStore } from '../../services/snippets.store';
 })
 export class ListGroupComponent {
   @Input() lists: List[] = [];
-  @Input() activeSnippetId?: string;
+  @Input() activeSnippetId?: number;
 
   @ViewChild('editListBodyTemplateRef')
   editListBodyTemplateRef!: TemplateRef<any>;
@@ -55,24 +55,29 @@ export class ListGroupComponent {
   private authService = inject(AuthService);
 
   private snackbarService = inject(SnackbarService);
+  private modalService = inject(ModalService);
 
   listName = '';
   snippetTitle = '';
-  currentUser = this.authService.currentUser;
-  currentUserId = this.currentUser?.uid;
+  currentUser = this.authService.session?.user;
+  currentUserId = this.currentUser?.id;
 
   editList(list: EditListDTO) {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: true,
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Rename list',
+        bodyTemplateRef: this.editListBodyTemplateRef,
+        confirmButtonLabel: 'Save',
+      },
     });
 
     this.listName = list.name;
 
-    dialogRef.componentInstance.title = 'Rename list';
-    dialogRef.componentInstance.bodyTemplateRef = this.editListBodyTemplateRef;
-    dialogRef.componentInstance.confirmButtonLabel = 'Save';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
+    modalAfterClosed$.subscribe((confirm) => {
       if (!confirm) {
         return;
       }
@@ -92,17 +97,20 @@ export class ListGroupComponent {
     });
   }
 
-  deleteList(id: string) {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+  deleteList(id: number) {
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Delete list',
+        body: 'Are you sure you want to delete this list?',
+        confirmButtonLabel: 'Delete',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Delete list';
-    dialogRef.componentInstance.body =
-      'Are you sure you want to delete this list?';
-    dialogRef.componentInstance.confirmButtonLabel = 'Delete';
-
-    dialogRef.afterClosed().subscribe((confirm) => {
+    modalAfterClosed$.subscribe((confirm) => {
       if (!confirm) {
         return;
       }
@@ -116,17 +124,20 @@ export class ListGroupComponent {
     });
   }
 
-  addSnippet(listId: string) {
-    const dialogRef = this.dialog.open(ModalComponent, {
-      disableClose: false,
+  addSnippet(listId: number) {
+    const modalAfterClosed$ = this.modalService.openModal({
+      dialogOptions: {
+        width: '400px',
+        disableClose: true,
+      },
+      componentProps: {
+        title: 'Add snippet',
+        bodyTemplateRef: this.addSnippetBodyTemplateRef,
+        confirmButtonLabel: 'Add',
+      },
     });
 
-    dialogRef.componentInstance.title = 'Add snippet';
-    dialogRef.componentInstance.bodyTemplateRef =
-      this.addSnippetBodyTemplateRef;
-    dialogRef.componentInstance.confirmButtonLabel = 'Add';
-
-    dialogRef.afterClosed().subscribe(async (confirm) => {
+    modalAfterClosed$.subscribe(async (confirm) => {
       if (!confirm) {
         return;
       }

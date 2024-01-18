@@ -23,15 +23,14 @@
       <div class="flex items-center">
         <app-list-group
           [lists]="vm.lists"
-          [activeSnippetId]="(activeSnippetId$ | async) || ''"
+          [activeSnippetId]="(activeSnippetId$ | async) || 0"
         ></app-list-group>
       </div>
       <div class="space-between mt-auto flex items-center py-2">
         <img
           [src]="
-            currentUser?.photoUrl
-              ? currentUser?.photoUrl
-              : 'https://ui-avatars.com/api/?name=' + currentUser?.username
+            'https://ui-avatars.com/api/?name=' +
+            (currentUser?.email ?? currentUser?.id)
           "
           class="h-7 w-7 rounded-full"
           alt="User's avatar"
@@ -41,8 +40,8 @@
     </div>
 
     <div id="content" class="col-span-3">
-      @if (vm.activeSnippet) {
-        <app-snippet [snippet]="vm.activeSnippet"></app-snippet>
+      @if (vm.activeSnippet; as snippet) {
+        <app-snippet [snippet]="snippet"></app-snippet>
       } @else {
         <app-default-snippet-view />
       }
@@ -50,7 +49,7 @@
   </div>
 }
 
-<ng-template #bodyTemplateRef>
+<ng-template #createListBodyTemplateRef>
   <p class="flex flex-col">
     <input
       type="text"
@@ -72,4 +71,35 @@
       }
     </span>
   </p>
+</ng-template>
+
+<ng-template #searchBodyTemplateRef>
+  <div class="flex flex-col">
+    <input
+      type="text"
+      class="peer w-full border p-2 text-sm"
+      [(ngModel)]="searchText"
+      required
+      #name="ngModel"
+      placeholder="Search"
+      (ngModelChange)="searchSnippets(searchText)"
+    />
+    @if (searchText) {
+      @if (matchingSnippets$ | async; as matchingSnippets) {
+        <div class="mt-2 flex flex-col space-y-2 text-sm">
+          @for (snippet of matchingSnippets; track snippet.id) {
+            <button
+              class="text-left"
+              type="button"
+              (click)="navigateToSnippet(snippet.id)"
+            >
+              {{ snippet.title }}
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="text-sm">Searching...</div>
+      }
+    }
+  </div>
 </ng-template>

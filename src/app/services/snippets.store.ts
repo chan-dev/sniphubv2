@@ -6,10 +6,10 @@ import {
   tapResponse,
 } from '@ngrx/component-store';
 
-import { EditListDTO, List, NewListWithTimestampDTO } from '../models/list';
+import { EditListDTO, List, NewListDTO } from '../models/list';
 import { SaveSnippetDTO, Snippet, UpdateSnippetDTO } from '../models/snippet';
 import { AuthService } from './auth.service';
-import { EMPTY, of, switchMap, tap } from 'rxjs';
+import { EMPTY, from, of, switchMap, tap } from 'rxjs';
 import { ListsService } from './lists.service';
 import { SnippetService } from './snippets.service';
 
@@ -94,10 +94,14 @@ export class SnippetsStore
           });
           return EMPTY;
         }
-        return this.listsService.getLists(userId).pipe(
+        return from(this.listsService.getLists(userId)).pipe(
           tapResponse(
             (lists) => {
-              this.patchState({ lists, isLoading: false, error: null });
+              this.patchState({
+                lists: lists.data ?? [],
+                isLoading: false,
+                error: null,
+              });
             },
             (error) => {
               console.log('error', { error });
@@ -114,7 +118,7 @@ export class SnippetsStore
   });
 
   saveList = this.effect<{
-    newList: NewListWithTimestampDTO | null;
+    newList: NewListDTO | null;
     cb?: () => void;
   }>((input$) => {
     return input$.pipe(
@@ -122,7 +126,7 @@ export class SnippetsStore
         if (!input.newList) {
           return EMPTY;
         }
-        return this.listsService.createList(input.newList).pipe(
+        return from(this.listsService.createList(input.newList)).pipe(
           tapResponse(
             (list) => {
               console.log('[saveList]: new list', list);
@@ -153,7 +157,7 @@ export class SnippetsStore
           });
           return EMPTY;
         }
-        return this.listsService.editList(input.list).pipe(
+        return from(this.listsService.editList(input.list)).pipe(
           tapResponse(
             () => {
               input.cb && input.cb();
@@ -188,7 +192,7 @@ export class SnippetsStore
   });
 
   deleteList = this.effect<{
-    id: string;
+    id: number;
     cb?: () => void;
   }>((input$) => {
     return input$.pipe(
@@ -204,7 +208,7 @@ export class SnippetsStore
           return EMPTY;
         }
 
-        return this.listsService.deleteList(input.id).pipe(
+        return from(this.listsService.deleteList(input.id)).pipe(
           tapResponse(
             () => {
               input.cb && input.cb();
@@ -232,7 +236,7 @@ export class SnippetsStore
     );
   });
 
-  getActiveSnippet = this.effect<string | null>((snippetId$) => {
+  getActiveSnippet = this.effect<number | null>((snippetId$) => {
     return snippetId$.pipe(
       tap(() => {
         this.patchState({ isLoading: true });
@@ -241,11 +245,11 @@ export class SnippetsStore
         if (!id) {
           return EMPTY;
         }
-        return this.snippetsService.getSnippet(id).pipe(
+        return from(this.snippetsService.getSnippet(id)).pipe(
           tapResponse(
             (snippet) => {
               this.patchState({
-                activeSnippet: snippet,
+                activeSnippet: snippet.data,
                 isLoading: false,
                 error: null,
               });
@@ -296,8 +300,8 @@ export class SnippetsStore
   });
 
   updateSnippet = this.effect<{
-    id: string;
-    list_id: string;
+    id: number;
+    list_id: number;
     snippet: UpdateSnippetDTO;
     cb?: () => void;
   }>((input$) => {
@@ -340,8 +344,7 @@ export class SnippetsStore
   });
 
   deleteSnippet = this.effect<{
-    id: string;
-    list_id: string;
+    id: number;
     cb?: () => void;
   }>((input$) => {
     return input$.pipe(
@@ -351,16 +354,14 @@ export class SnippetsStore
         }),
       ),
       switchMap((input) => {
-        if (!input.id || !input.list_id) {
+        if (!input.id) {
           this.patchState({
             isLoading: false,
             error: { message: 'No snippet provided' },
           });
           return EMPTY;
         }
-        return of(
-          this.snippetsService.deleteSnippet(input.id, input.list_id),
-        ).pipe(
+        return of(this.snippetsService.deleteSnippet(input.id)).pipe(
           tapResponse(
             () => {
               input.cb && input.cb();
