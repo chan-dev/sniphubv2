@@ -19,10 +19,9 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { provideComponentStore } from '@ngrx/component-store';
-import { Subject, map, shareReplay, switchMap, of } from 'rxjs';
+import { Subject, map, shareReplay } from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -32,7 +31,7 @@ import {
 } from '@ng-icons/ionicons';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-import { List, NewListDTO } from '../../models/list';
+import { NewListDTO } from '../../models/list';
 import { SnippetComponent } from '../../components/snippet/snippet.component';
 import { ListComponent } from '../../components/list/list.component';
 import { ListGroupComponent } from '../../components/list-group/list-group.component';
@@ -44,7 +43,7 @@ import { Snippet } from '../../models/snippet';
 import { SnippetService } from '../../services/snippets.service';
 import { ModalService } from '../../services/modal.service';
 import { AuthService } from '../../services/auth.service';
-import { ListsService } from '../../services/lists.service';
+import { DbSyncService } from '../../services/db-sync.service';
 
 @Component({
   selector: 'app-home',
@@ -87,18 +86,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private ngZone = inject(NgZone);
   private renderer = inject(Renderer2);
-  private listsService = inject(ListsService);
   private snippetsService = inject(SnippetService);
   private modalService = inject(ModalService);
+  private dbSyncService = inject(DbSyncService);
 
   private removeSearchEventListener?: Function;
-
-  private readonly defaultSnippet = {
-    id: 0,
-    title: 'Untitled',
-    content: '',
-    language: '',
-  } as Snippet;
 
   vm$ = this.snippetsStore.vm$;
 
@@ -108,7 +100,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('searchBodyTemplateRef')
   searchBodyTemplateRef!: TemplateRef<any>;
 
-  lists: List[] = [];
   listName = '';
   searchText = '';
   currentUser = this.authService.session?.user;
@@ -123,8 +114,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   );
 
   ngOnInit() {
-    this.snippetsStore.getLists(this.currentUserId ?? null);
-    this.snippetsStore.getActiveSnippet(this.activeSnippetId$);
+    this.snippetsStore.getListsEffect(this.currentUserId ?? null);
+    this.snippetsStore.getActiveSnippetEffect(this.activeSnippetId$);
+
+    this.dbSyncService.listen(this.snippetsStore);
   }
 
   ngAfterViewInit(): void {
@@ -152,6 +145,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.removeSearchEventListener) {
       this.removeSearchEventListener();
     }
+
+    this.dbSyncService.unlisten();
   }
 
   async logout() {
@@ -192,7 +187,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         user_id: this.currentUserId,
       };
 
-      this.snippetsStore.saveList({
+      this.snippetsStore.saveListEffect({
         newList,
         cb: () => {
           this.listName = '';

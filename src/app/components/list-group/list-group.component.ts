@@ -10,7 +10,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog } from '@angular/material/dialog';
 
 import { EditListDTO, List } from '../../models/list';
 import { ListComponent } from '../list/list.component';
@@ -50,7 +49,6 @@ export class ListGroupComponent {
   @ViewChild('addSnippetBodyTemplateRef')
   addSnippetBodyTemplateRef!: TemplateRef<any>;
 
-  private dialog = inject(MatDialog);
   private snippetsStore = inject(SnippetsStore);
   private authService = inject(AuthService);
 
@@ -87,7 +85,7 @@ export class ListGroupComponent {
         name: this.listName,
       };
 
-      this.snippetsStore.editList({
+      this.snippetsStore.editListEffect({
         list: editListDTO,
         cb: () => {
           this.openSnackbar('List updated');
@@ -115,7 +113,7 @@ export class ListGroupComponent {
         return;
       }
 
-      this.snippetsStore.deleteList({
+      this.snippetsStore.deleteListEffect({
         id,
         cb: () => {
           this.openSnackbar('List deleted');
@@ -155,7 +153,7 @@ export class ListGroupComponent {
         user_id: this.currentUserId,
       };
 
-      this.snippetsStore.addSnippet({
+      this.snippetsStore.addSnippetEffect({
         snippet: newSnippet,
         cb: () => {
           this.snippetTitle = '';

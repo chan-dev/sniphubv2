@@ -86,7 +86,7 @@ export class ListComponent {
         title: this.snippetTitle,
       };
 
-      this.snippetsStore.updateSnippet({
+      this.snippetsStore.updateSnippetEffect({
         id,
         list_id: listId,
         snippet: updatedSnippet,
@@ -115,7 +115,7 @@ export class ListComponent {
         return;
       }
 
-      this.snippetsStore.deleteSnippet({
+      this.snippetsStore.deleteSnippetEffect({
         id,
         cb: () => {
           const firstNonDeletedSnippetId = Object.keys(

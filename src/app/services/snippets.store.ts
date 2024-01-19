@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { EMPTY, from, switchMap, tap } from 'rxjs';
 import {
   ComponentStore,
   OnStateInit,
@@ -6,10 +7,9 @@ import {
   tapResponse,
 } from '@ngrx/component-store';
 
-import { EditListDTO, List, NewListDTO } from '../models/list';
+import { EditListDTO, EmbeddedSnippet, List, NewListDTO } from '../models/list';
 import { SaveSnippetDTO, Snippet, UpdateSnippetDTO } from '../models/snippet';
 import { AuthService } from './auth.service';
-import { EMPTY, from, switchMap, tap } from 'rxjs';
 import { ListsService } from './lists.service';
 import { SnippetService } from './snippets.service';
 
@@ -64,7 +64,7 @@ export class SnippetsStore
       };
     },
     { debounce: true },
-  );
+  ).pipe(tap((data) => console.log('component store update', data)));
 
   constructor() {
     // NOTE: we may need to lazily load state using setState
@@ -80,7 +80,7 @@ export class SnippetsStore
     console.log('[SnippetsStore]: onStoreInit');
   }
 
-  getLists = this.effect<string | null>((userId$) => {
+  getListsEffect = this.effect<string | null>((userId$) => {
     return userId$.pipe(
       tap(() => {
         this.patchState({ isLoading: true });
@@ -117,7 +117,7 @@ export class SnippetsStore
     );
   });
 
-  saveList = this.effect<{
+  saveListEffect = this.effect<{
     newList: NewListDTO | null;
     cb?: () => void;
   }>((input$) => {
@@ -141,7 +141,7 @@ export class SnippetsStore
     );
   });
 
-  editList = this.effect<{
+  editListEffect = this.effect<{
     list: EditListDTO;
     cb?: () => void;
   }>((input$) => {
@@ -159,7 +159,8 @@ export class SnippetsStore
         }
         return from(this.listsService.editList(input.list)).pipe(
           tapResponse(
-            () => {
+            (result) => {
+              console.log('edit list result', result);
               input.cb && input.cb();
               this.patchState((state) => {
                 return {
@@ -191,7 +192,7 @@ export class SnippetsStore
     );
   });
 
-  deleteList = this.effect<{
+  deleteListEffect = this.effect<{
     id: number;
     cb?: () => void;
   }>((input$) => {
@@ -210,7 +211,9 @@ export class SnippetsStore
 
         return from(this.listsService.deleteList(input.id)).pipe(
           tapResponse(
-            () => {
+            (result) => {
+              console.log('deleted list', result);
+
               input.cb && input.cb();
               this.patchState((state) => {
                 return {
@@ -236,7 +239,7 @@ export class SnippetsStore
     );
   });
 
-  getActiveSnippet = this.effect<number | null>((snippetId$) => {
+  getActiveSnippetEffect = this.effect<number | null>((snippetId$) => {
     return snippetId$.pipe(
       tap(() => {
         this.patchState({ isLoading: true });
@@ -267,7 +270,91 @@ export class SnippetsStore
     );
   });
 
-  addSnippet = this.effect<{
+  readonly addSnippet = this.updater((state, newSnippet: Snippet) => {
+    return {
+      ...state,
+      lists: state.lists.map((list) => {
+        if (newSnippet.list_id === list.id) {
+          const { id, title, created_at } = newSnippet;
+          const embeddedSnippet: EmbeddedSnippet = {
+            id,
+            title,
+            created_at,
+          };
+          list.snippets = [...(list.snippets ?? []), embeddedSnippet];
+
+          return {
+            ...list,
+          };
+        } else {
+          return list;
+        }
+      }),
+    };
+  });
+
+  readonly updateActiveSnippet = this.updater(
+    (state, updatedSnippet: Snippet) => {
+      return {
+        ...state,
+        activeSnippet: {
+          ...state.activeSnippet,
+          ...updatedSnippet,
+        },
+        lists: state.lists.map((list) => {
+          if (updatedSnippet.list_id === list.id) {
+            const { id, title, created_at } = updatedSnippet;
+
+            list.snippets = (list.snippets || []).map((snippet) => {
+              if (snippet.id === updatedSnippet.id) {
+                return {
+                  ...snippet,
+                  id,
+                  title,
+                  created_at,
+                };
+              } else {
+                return snippet;
+              }
+            });
+
+            return {
+              ...list,
+            };
+          } else {
+            return list;
+          }
+        }),
+      };
+    },
+  );
+
+  readonly deleteSnippet = this.updater((state, deletedSnippetId: number) => {
+    const parentListOfDeletedSnippet = state.lists.find((list) => {
+      return list.snippets?.find((snippet) => {
+        return snippet.id === deletedSnippetId;
+      });
+    });
+
+    return {
+      ...state,
+      lists: state.lists.map((list) => {
+        if (parentListOfDeletedSnippet?.id === list.id) {
+          list.snippets = (list.snippets || []).filter((snippet) => {
+            return snippet.id !== deletedSnippetId;
+          });
+
+          return {
+            ...list,
+          };
+        } else {
+          return list;
+        }
+      }),
+    };
+  });
+
+  addSnippetEffect = this.effect<{
     snippet: SaveSnippetDTO;
     cb: () => void;
   }>((input$) => {
@@ -300,7 +387,7 @@ export class SnippetsStore
     );
   });
 
-  updateSnippet = this.effect<{
+  updateSnippetEffect = this.effect<{
     id: number;
     list_id: number;
     snippet: UpdateSnippetDTO;
@@ -344,7 +431,7 @@ export class SnippetsStore
     );
   });
 
-  deleteSnippet = this.effect<{
+  deleteSnippetEffect = this.effect<{
     id: number;
     cb?: () => void;
   }>((input$) => {

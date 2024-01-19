@@ -201,7 +201,7 @@ export class SnippetComponent implements OnInit {
           data.title = this.editorTitle;
         }
 
-        this.snippetsStore.updateSnippet({
+        this.snippetsStore.updateSnippetEffect({
           id: snippetId,
           list_id: this.activeSnippet.list_id,
           snippet: data,
