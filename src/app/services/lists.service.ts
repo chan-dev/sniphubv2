@@ -8,7 +8,7 @@ export class ListsService {
   getLists(userId: string) {
     return db
       .from('lists')
-      .select('*, snippets(id, title)')
+      .select('*, snippets(id, title, created_at)')
       .eq('user_id', userId)
       .order('created_at', { ascending: true });
   }
