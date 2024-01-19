@@ -9,7 +9,7 @@ import {
 import { EditListDTO, List, NewListDTO } from '../models/list';
 import { SaveSnippetDTO, Snippet, UpdateSnippetDTO } from '../models/snippet';
 import { AuthService } from './auth.service';
-import { EMPTY, from, of, switchMap, tap } from 'rxjs';
+import { EMPTY, from, switchMap, tap } from 'rxjs';
 import { ListsService } from './lists.service';
 import { SnippetService } from './snippets.service';
 
@@ -281,9 +281,10 @@ export class SnippetsStore
           });
           return EMPTY;
         }
-        return of(this.snippetsService.addSnippet(input.snippet)).pipe(
+        return from(this.snippetsService.addSnippet(input.snippet)).pipe(
           tapResponse(
-            () => {
+            (result) => {
+              console.log(`new snippet`, result.data);
               input.cb();
               this.patchState({ isLoading: false, error: null });
             },
@@ -319,7 +320,7 @@ export class SnippetsStore
           });
           return EMPTY;
         }
-        return of(
+        return from(
           this.snippetsService.updateSnippet(
             input.id,
             input.list_id,
@@ -361,7 +362,7 @@ export class SnippetsStore
           });
           return EMPTY;
         }
-        return of(this.snippetsService.deleteSnippet(input.id)).pipe(
+        return from(this.snippetsService.deleteSnippet(input.id)).pipe(
           tapResponse(
             () => {
               input.cb && input.cb();
