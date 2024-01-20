@@ -16,6 +16,7 @@ import {
   ionEllipsisHorizontal,
   ionCodeSlashOutline,
   ionAddCircleOutline,
+  ionSearchOutline,
 } from '@ng-icons/ionicons';
 import { simpleJavascript, simpleGoogle } from '@ng-icons/simple-icons';
 import { tablerLoader2 } from '@ng-icons/tabler-icons';
@@ -40,6 +41,7 @@ import { tablerLoader2 } from '@ng-icons/tabler-icons';
       ionCodeSlashOutline,
       ionPencilOutline,
       ionAddCircleOutline,
+      ionSearchOutline,
       simpleJavascript,
       simpleGoogle,
       tablerLoader2,

@@ -12,6 +12,16 @@
           <button
             type="button"
             class="inline-flex items-center"
+            (click)="openSearchModal()"
+          >
+            <ng-icon
+              name="ionSearchOutline"
+              style="--ng-icon__size: 1.5em"
+            ></ng-icon>
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center"
             (click)="createList()"
           >
             <ng-icon

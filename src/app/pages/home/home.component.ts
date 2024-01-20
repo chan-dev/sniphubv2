@@ -127,13 +127,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.removeSearchEventListener = this.renderer.listen(
         document.body,
         'keydown',
-        (event) => {
-          if (event.ctrlKey && event.key === 'k') {
-            console.log('open search modal');
-            event.preventDefault();
-
-            this.ngZone.run(() => {
+        (event: KeyboardEvent) => {
+          if (event.altKey && event.key === 'k') {
+            this.runInsideZone(event, () => {
               this.openSearchModal();
+            });
+          } else if (event.altKey && event.key === 'n') {
+            this.runInsideZone(event, () => {
+              this.createList();
             });
           }
         },
@@ -232,5 +233,13 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       },
     });
     this.modalService.closeDialog();
+  }
+
+  private runInsideZone(event: Event, cb: Function) {
+    event.preventDefault();
+
+    this.ngZone.run(() => {
+      cb();
+    });
   }
 }
