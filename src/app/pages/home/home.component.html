@@ -68,6 +68,7 @@
       }"
       [(ngModel)]="listName"
       required
+      cdkFocusInitial
       #name="ngModel"
     />
     <!-- Add explicit height to prevent UI layout shifts -->
@@ -88,6 +89,7 @@
       required
       #name="ngModel"
       placeholder="Search"
+      cdkFocusInitial
       (ngModelChange)="searchSnippets(searchText)"
     />
     @if (searchText) {
