@@ -69,16 +69,11 @@ export class SnippetsStore
   constructor() {
     // NOTE: we may need to lazily load state using setState
     super(initialState);
-    console.log('SnippetsStore');
   }
 
-  ngrxOnStateInit() {
-    console.log('[SnippetsStore]: onStateInit');
-  }
+  ngrxOnStateInit() {}
 
-  ngrxOnStoreInit() {
-    console.log('[SnippetsStore]: onStoreInit');
-  }
+  ngrxOnStoreInit() {}
 
   getListsEffect = this.effect<string | null>((userId$) => {
     return userId$.pipe(
@@ -104,7 +99,6 @@ export class SnippetsStore
               });
             },
             (error) => {
-              console.log('error', { error });
               this.patchState({
                 lists: [],
                 isLoading: false,
@@ -129,12 +123,9 @@ export class SnippetsStore
         return from(this.listsService.createList(input.newList)).pipe(
           tapResponse(
             (list) => {
-              console.log('[saveList]: new list', list);
               input.cb && input.cb();
             },
-            (error) => {
-              console.log('[saveList]: error', { error });
-            },
+            (error) => {},
           ),
         );
       }),
@@ -159,8 +150,7 @@ export class SnippetsStore
         }
         return from(this.listsService.editList(input.list)).pipe(
           tapResponse(
-            (result) => {
-              console.log('edit list result', result);
+            (_result) => {
               input.cb && input.cb();
               this.patchState((state) => {
                 return {
@@ -211,9 +201,7 @@ export class SnippetsStore
 
         return from(this.listsService.deleteList(input.id)).pipe(
           tapResponse(
-            (result) => {
-              console.log('deleted list', result);
-
+            (_result) => {
               input.cb && input.cb();
               this.patchState((state) => {
                 return {
@@ -268,6 +256,38 @@ export class SnippetsStore
         );
       }),
     );
+  });
+
+  readonly addList = this.updater((state, newList: List) => {
+    return {
+      ...state,
+      lists: [...state.lists, newList],
+    };
+  });
+
+  readonly updateList = this.updater((state, updatedList: List) => {
+    return {
+      ...state,
+      lists: state.lists.map((list) => {
+        if (updatedList.id === list.id) {
+          return {
+            ...list,
+            ...updatedList,
+          };
+        } else {
+          return list;
+        }
+      }),
+    };
+  });
+
+  readonly removeList = this.updater((state, deletedListId: number) => {
+    return {
+      ...state,
+      lists: state.lists.filter((list) => {
+        return deletedListId !== list.id;
+      }),
+    };
   });
 
   readonly addSnippet = this.updater((state, newSnippet: Snippet) => {
@@ -370,8 +390,7 @@ export class SnippetsStore
         }
         return from(this.snippetsService.addSnippet(input.snippet)).pipe(
           tapResponse(
-            (result) => {
-              console.log(`new snippet`, result.data);
+            (_result) => {
               input.cb();
               this.patchState({ isLoading: false, error: null });
             },

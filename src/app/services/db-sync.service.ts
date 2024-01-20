@@ -3,6 +3,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 import { db } from '../db';
 import { SnippetsStore } from './snippets.store';
 import { Snippet } from '../models/snippet';
+import { List } from '../models/list';
 
 @Injectable({ providedIn: 'root' })
 export class DbSyncService implements OnDestroy {
@@ -14,7 +15,7 @@ export class DbSyncService implements OnDestroy {
 
   listen(snippetStore: SnippetsStore) {
     this.listener = db
-      .channel('schema-db-changes')
+      .channel('db-sync')
       .on(
         'postgres_changes',
         {
@@ -23,34 +24,30 @@ export class DbSyncService implements OnDestroy {
         },
         (payload) => {
           const { new: newData, old, table, eventType } = payload;
-          console.log('payload', payload);
+
           if (table === 'lists') {
             switch (eventType) {
               case 'INSERT':
+                snippetStore.addList(newData as List);
                 break;
               case 'UPDATE':
+                snippetStore.updateList(newData as List);
                 break;
               case 'DELETE':
+                const deletedListId = old['id'];
+
+                snippetStore.removeList(deletedListId);
                 break;
             }
           } else if (table === 'snippets') {
             switch (eventType) {
               case 'INSERT':
-                console.log(`insert`, newData);
                 snippetStore.addSnippet(newData as Snippet);
                 break;
               case 'UPDATE':
-                console.log(`update`, {
-                  old,
-                  newData,
-                });
                 snippetStore.updateActiveSnippet(newData as Snippet);
                 break;
               case 'DELETE':
-                console.log(`deleted snippet`, {
-                  old,
-                  newData,
-                });
                 const deletedSnippetId = old['id'];
                 snippetStore.deleteSnippet(deletedSnippetId);
                 break;
