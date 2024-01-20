@@ -45,6 +45,7 @@ export class ListComponent {
 
     this.isActiveList =
       this.list.snippets?.find((snippet) => snippet.id === id) !== undefined;
+    this.isExpanded = this.isActiveList;
   }
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
