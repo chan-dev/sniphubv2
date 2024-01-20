@@ -109,7 +109,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   matchingSnippets$ = this.searchResultsSubject.asObservable();
 
   activeSnippetId$ = this.route.queryParamMap.pipe(
-    map((params) => +(params.get('snippetId') ?? 0)),
+    map((params) => +(params.get('snippetId') ?? -1)),
     shareReplay(1),
   );
 

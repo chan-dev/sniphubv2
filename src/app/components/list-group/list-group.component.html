@@ -5,7 +5,10 @@
       [matMenuTriggerFor]="listMenu"
       isContextMenu
     >
-      <app-list [list]="list" [activeSnippetId]="activeSnippetId"></app-list>
+      <app-list
+        [list]="list"
+        [activeSnippetId]="activeSnippetId ?? -1"
+      ></app-list>
 
       <mat-menu #listMenu="matMenu" [hasBackdrop]="false">
         <button

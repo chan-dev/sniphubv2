@@ -40,7 +40,12 @@ import { UpdateSnippetDTO } from '../../models/snippet';
 })
 export class ListComponent {
   @Input() list!: List;
-  @Input() activeSnippetId?: number;
+  @Input() set activeSnippetId(id: number) {
+    this.snippetId = id;
+
+    this.isActiveList =
+      this.list.snippets?.find((snippet) => snippet.id === id) !== undefined;
+  }
 
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
   @ViewChild('editSnippetBodyTemplateRef')
@@ -54,6 +59,8 @@ export class ListComponent {
 
   isExpanded = false;
   snippetTitle = '';
+  snippetId = -1;
+  isActiveList = false;
 
   editList(id: number) {
     console.log('editList', id);

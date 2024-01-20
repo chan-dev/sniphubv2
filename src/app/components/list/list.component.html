@@ -1,4 +1,9 @@
-<span class="inline-flex items-center" (click)="toggleList()">
+<!-- List title -->
+<span
+  class="inline-flex w-full items-center pl-2"
+  [ngClass]="{ 'bg-gray-200': !isExpanded && isActiveList }"
+  (click)="toggleList()"
+>
   <ng-icon
     [name]="isExpanded ? 'ionChevronDown' : 'ionChevronForward'"
   ></ng-icon>
@@ -7,17 +12,19 @@
 </span>
 
 @if (isExpanded && list.snippets?.length) {
-  <ul (click)="$event.stopPropagation()">
+  <!-- NOTE: the left-padding should double whatever is set on the list title to
+  give the impression of nesting. -->
+  <ul class="pl-4" (click)="$event.stopPropagation()">
     @for (snippet of list.snippets; track snippet.id) {
-      <li class="relative pl-4" [matMenuTriggerFor]="snippetMenu" isContextMenu>
+      <li class="relative" [matMenuTriggerFor]="snippetMenu" isContextMenu>
         <a routerLink="." [queryParams]="{ snippetId: snippet.id }">{{
           snippet.title
         }}</a>
 
-        @if (activeSnippetId === snippet.id) {
-          <!-- TODO: find a better way to achieve this styling. Expand to the entire width of the sidebar -->
+        @if (snippetId === snippet.id) {
+          <!-- NOTE: negative margin = parent's left padding + grand-parent's left padding to negate all previous paddings.  -->
           <div
-            class="absolute inset-x-0 top-0 -z-10 -ml-[32px] -mr-[9px] h-full bg-gray-200"
+            class="absolute inset-x-0 top-0 -z-10 -ml-6 -mr-2 h-full bg-gray-200"
           ></div>
         }
 

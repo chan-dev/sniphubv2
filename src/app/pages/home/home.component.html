@@ -2,9 +2,10 @@
   <div class="grid h-full grid-cols-4" role="main">
     <div
       id="sidebar"
-      class="col-span-1 flex flex-col border-r border-r-gray-400 p-2"
+      class="col-span-1 flex flex-col border-r border-r-gray-400 py-2"
     >
-      <div class="mb-2 flex justify-between">
+      <!-- sidebar header -->
+      <div class="flex justify-between px-2">
         <a routerLink="/">My Snippets</a>
 
         <div class="flex">
@@ -20,13 +21,17 @@
           </button>
         </div>
       </div>
-      <div class="flex items-center">
+
+      <!-- sidebar main -->
+      <div class="flex items-center py-2">
         <app-list-group
           [lists]="vm.lists"
-          [activeSnippetId]="(activeSnippetId$ | async) || 0"
+          [activeSnippetId]="(activeSnippetId$ | async) || -1"
         ></app-list-group>
       </div>
-      <div class="space-between mt-auto flex items-center py-2">
+
+      <!-- sidebar footer -->
+      <div class="space-between mt-auto flex items-center px-2">
         <img
           [src]="
             'https://ui-avatars.com/api/?name=' +
@@ -39,6 +44,7 @@
       </div>
     </div>
 
+    <!-- snippet content -->
     <div id="content" class="col-span-3">
       @if (vm.activeSnippet; as snippet) {
         <app-snippet [snippet]="snippet"></app-snippet>
