@@ -128,6 +128,10 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         document.body,
         'keydown',
         (event: KeyboardEvent) => {
+          if (!event.altKey) {
+            return;
+          }
+
           if (event.altKey && event.key === 'k') {
             this.runInsideZone(event, () => {
               this.openSearchModal();
