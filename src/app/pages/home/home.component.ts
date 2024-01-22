@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   NgZone,
   OnDestroy,
   OnInit,
@@ -12,6 +13,7 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ActivatedRoute,
   Router,
@@ -21,7 +23,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { provideComponentStore } from '@ngrx/component-store';
-import { Subject, map, shareReplay } from 'rxjs';
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+} from 'rxjs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   ionAdd,
@@ -80,6 +88,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdRef = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
   private authService = inject(AuthService);
 
   private snippetsStore = inject(SnippetsStore);
@@ -105,6 +114,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUser = this.authService.session?.user;
   currentUserId = this.currentUser?.id;
 
+  searchActionSubject = new Subject<string>();
   searchResultsSubject = new Subject<Snippet[]>();
   matchingSnippets$ = this.searchResultsSubject.asObservable();
 
@@ -118,6 +128,26 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.snippetsStore.getActiveSnippetEffect(this.activeSnippetId$);
 
     this.dbSyncService.listen(this.snippetsStore);
+
+    this.searchActionSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(async (searchPattern) => {
+        const { data, error } =
+          await this.snippetsService.searchSnippets(searchPattern);
+
+        if (error) {
+          console.error(`Failed to search snippets: ${error.message}`);
+          return;
+        }
+
+        if (data) {
+          this.searchResultsSubject.next(data);
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -221,13 +251,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async searchSnippets(searchPattern: string) {
-    // TODO: update component store
-    const { data, error } =
-      await this.snippetsService.searchSnippets(searchPattern);
-
-    if (data) {
-      this.searchResultsSubject.next(data);
-    }
+    this.searchActionSubject.next(searchPattern);
   }
 
   navigateToSnippet(snippetId: number) {

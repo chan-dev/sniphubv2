@@ -47,5 +47,5 @@ Thumbs.db
 .runtimeconfig.json
 
 # Environment variables
-.env
+.env*
 !.env.example
