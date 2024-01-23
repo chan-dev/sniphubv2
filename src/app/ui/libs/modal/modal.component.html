@@ -1,10 +1,10 @@
 <!-- TemplateRef bindings are prioritized over primitive values -->
 <h3 mat-dialog-title class="!py-1 text-base">
   @if (titleTemplateRef) {
-    <ng-container>
-      *ngTemplateOutlet="titleTemplateRef; context: titleContext"
-      ></ng-container
-    >
+    <ng-container
+      [ngTemplateOutlet]="titleTemplateRef"
+      [ngTemplateOutletContext]="titleContext"
+    ></ng-container>
   } @else if (title) {
     <span>{{ title }}</span>
   } @else {
@@ -22,7 +22,10 @@
 </div>
 <div mat-dialog-actions class="flex !min-h-fit !justify-end gap-2 !px-6">
   @if (ctaTemplateRef) {
-    <ng-container> *ngTemplateOutlet="ctaTemplateRef" ></ng-container>
+    <ng-container
+      [ngTemplateOutlet]="ctaTemplateRef"
+      [ngTemplateOutletContext]="ctaContext"
+    ></ng-container>
   } @else {
     <div class="flex w-[200px] gap-1 [&_button]:flex-1">
       <button

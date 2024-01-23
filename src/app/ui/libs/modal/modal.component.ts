@@ -1,17 +1,5 @@
-import {
-  NgClass,
-  NgIf,
-  NgIfContext,
-  NgStyle,
-  NgTemplateOutlet,
-} from '@angular/common';
-import {
-  Component,
-  Input,
-  TemplateRef,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { NgClass, NgStyle, NgTemplateOutlet } from '@angular/common';
+import { Component, Input, TemplateRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MatDialogTitle,
@@ -19,7 +7,6 @@ import {
   MatDialogActions,
   MatDialogClose,
   MatDialogRef,
-  MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 
 export interface ModalComponentProps {
@@ -43,8 +30,6 @@ export interface ModalComponentProps {
     MatDialogClose,
     NgClass,
     NgStyle,
-    // NgIf,
-    // NgIfContext
     NgTemplateOutlet,
   ],
   templateUrl: './modal.component.html',
@@ -64,5 +49,9 @@ export class ModalComponent {
 
   titleContext = {
     title: this.title,
+  };
+
+  ctaContext = {
+    close: () => this.dialogRef.close(),
   };
 }

@@ -108,6 +108,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('searchBodyTemplateRef')
   searchBodyTemplateRef!: TemplateRef<any>;
+  @ViewChild('searchCallToActionTemplateRef')
+  searchCallToActionTemplateRef!: TemplateRef<any>;
 
   listName = '';
   searchText = '';
@@ -241,7 +243,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       componentProps: {
         title: 'Search snippets',
         bodyTemplateRef: this.searchBodyTemplateRef,
-        confirmButtonLabel: 'Search',
+        ctaTemplateRef: this.searchCallToActionTemplateRef,
       },
     });
 
