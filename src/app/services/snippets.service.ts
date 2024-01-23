@@ -33,9 +33,15 @@ export class SnippetService {
   }
 
   searchSnippets(searchPattern: string) {
-    return db.from('snippets').select().textSearch('title', searchPattern, {
-      type: 'websearch',
-      config: 'english',
-    });
+    // Searching multiple column: title and content.
+    // Under the hood, we created a postgresql function in supabase.
+    // https://supabase.com/docs/guides/database/full-text-search#search-multiple-columns
+    return db
+      .from('snippets')
+      .select()
+      .textSearch('title_content', searchPattern, {
+        type: 'websearch',
+        config: 'english',
+      });
   }
 }
