@@ -75,5 +75,6 @@
     [options]="editorOptions"
     [(ngModel)]="editorContent"
     (ngModelChange)="updateEditorContent($event)"
+    (onInit)="onEditorInit()"
   ></ngx-monaco-editor>
 </div>

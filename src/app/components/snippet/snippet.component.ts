@@ -148,12 +148,18 @@ export class SnippetComponent implements OnInit {
 
   onEditorInit() {
     // TODO: add a service for local storage
-    const languages = localStorage.getItem('languages');
-    if (languages) {
-      this.languages = JSON.parse(languages);
+    const supportedLanguages = localStorage.getItem('supportedLanguages');
+    if (supportedLanguages) {
+      this.languages = JSON.parse(supportedLanguages);
     } else {
-      this.languages = window.monaco.languages.getLanguages();
-      localStorage.setItem('languages', JSON.stringify(this.languages));
+      this.languages = window.monaco?.languages?.getLanguages() || [];
+
+      if (this.languages.length > 0) {
+        localStorage.setItem(
+          'supportedLanguages',
+          JSON.stringify(this.languages),
+        );
+      }
     }
   }
 
