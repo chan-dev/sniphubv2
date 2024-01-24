@@ -15,10 +15,23 @@
           mat-menu-item
           (click)="editList({ id: list.id, name: list.name })"
         >
-          Rename
+          <span class="inline-flex items-center">
+            <ng-icon name="ionPencilSharp" class="mr-3"></ng-icon>
+            Rename
+          </span>
         </button>
-        <button mat-menu-item (click)="deleteList(list.id)">Delete</button>
-        <button mat-menu-item (click)="addSnippet(list.id)">Add snippet</button>
+        <button mat-menu-item (click)="deleteList(list.id)">
+          <span class="inline-flex items-center">
+            <ng-icon name="ionTrashOutline" class="mr-3"></ng-icon>
+            Delete
+          </span>
+        </button>
+        <button mat-menu-item (click)="addSnippet(list.id)">
+          <span class="inline-flex items-center">
+            <ng-icon name="ionAdd" class="mr-3"></ng-icon>
+            Add snippet
+          </span>
+        </button>
       </mat-menu>
     </li>
   }
